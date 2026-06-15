@@ -26,7 +26,19 @@ public static class DependencyInjectionExtensions
                 Title = "ECS Fleet Maintenance & Inventory API",
                 Version = "v1"
             });
-            // JWT bearer security definition is added in the auth prompt.
+
+            var scheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "JWT access token. Example: \"Bearer {token}\"",
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            };
+            options.AddSecurityDefinition("Bearer", scheme);
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement { [scheme] = Array.Empty<string>() });
         });
 
         var origins = configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];

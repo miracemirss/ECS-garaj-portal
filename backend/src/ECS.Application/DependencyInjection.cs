@@ -1,10 +1,12 @@
 using System.Reflection;
 using ECS.Application.Features.Alerts;
 using ECS.Application.Features.Assignments;
+using ECS.Application.Features.Auth;
 using ECS.Application.Features.Drivers;
 using ECS.Application.Features.Inventory;
 using ECS.Application.Features.Maintenance;
 using ECS.Application.Features.Reports;
+using ECS.Application.Features.Settings;
 using ECS.Application.Features.Trailers;
 using ECS.Application.Features.Vehicles;
 using FluentValidation;
@@ -42,6 +44,8 @@ public static class DependencyInjection
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IAlertService, AlertService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ISettingsService, SettingsService>();
 
         return services;
     }

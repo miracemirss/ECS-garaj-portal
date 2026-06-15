@@ -1,13 +1,16 @@
 using System.Net;
 using System.Text.Json;
+using ECS.Api.Common.Models;
 using ECS.Application.Common.Exceptions;
 using ECS.Domain.Exceptions;
+using ValidationException = ECS.Application.Common.Exceptions.ValidationException;
 
 namespace ECS.Api.Middleware;
 
 /// <summary>
-/// Centralized exception-to-HTTP translation so controllers and services never
-/// build error responses themselves.
+/// Centralized exception-to-response translation. Produces the standard
+/// ApiResponse error envelope (with traceId) so controllers/services never build
+/// error responses themselves.
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
@@ -34,29 +37,26 @@ public sealed class ExceptionHandlingMiddleware
 
     private async Task HandleAsync(HttpContext context, Exception exception)
     {
-        var (status, title) = exception switch
+        var traceId = context.TraceIdentifier;
+        var (status, message, errors) = exception switch
         {
-            ValidationException => (HttpStatusCode.BadRequest, "Validation failed"),
-            NotFoundException => (HttpStatusCode.NotFound, "Resource not found"),
-            DomainException => (HttpStatusCode.Conflict, "Business rule violation"),
-            _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred")
+            ValidationException ve => (HttpStatusCode.BadRequest, "Validation failed", (object?)ve.Errors),
+            NotFoundException => (HttpStatusCode.NotFound, exception.Message, null),
+            DomainException => (HttpStatusCode.Conflict, exception.Message, null),
+            _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred", null)
         };
 
         if (status == HttpStatusCode.InternalServerError)
         {
-            _logger.LogError(exception, "Unhandled exception while processing {Path}", context.Request.Path);
+            _logger.LogError(exception, "Unhandled exception ({TraceId}) on {Path}", traceId, context.Request.Path);
         }
 
         context.Response.StatusCode = (int)status;
         context.Response.ContentType = "application/json";
 
-        var payload = JsonSerializer.Serialize(new
-        {
-            title,
-            status = (int)status,
-            detail = exception.Message
-        });
-
-        await context.Response.WriteAsync(payload);
+        var payload = ApiResponse.Failure(message, errors, (int)status, traceId);
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload, JsonOptions));
     }
+
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 }

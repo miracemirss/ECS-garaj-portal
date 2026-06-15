@@ -30,6 +30,16 @@ public class CompanySetting : AuditableEntity
         return new CompanySetting(companyName.Trim(), string.IsNullOrWhiteSpace(currency) ? "TRY" : currency.ToUpperInvariant());
     }
 
+    public void UpdateProfile(string companyName, string currency)
+    {
+        if (string.IsNullOrWhiteSpace(companyName))
+        {
+            throw new DomainException("Company name is required.");
+        }
+        CompanyName = companyName.Trim();
+        DefaultCurrency = string.IsNullOrWhiteSpace(currency) ? DefaultCurrency : currency.ToUpperInvariant();
+    }
+
     public void UpdateThresholds(int maintenanceKm, int maintenanceDays, int documentDays)
     {
         if (maintenanceKm < 0 || maintenanceDays < 0 || documentDays < 0)

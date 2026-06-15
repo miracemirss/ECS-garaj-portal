@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<INumberGenerator, NumberGenerator>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }

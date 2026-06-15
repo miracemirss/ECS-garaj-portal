@@ -15,7 +15,9 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddPersistence(builder.Configuration)
-    .AddApiServices(builder.Configuration);
+    .AddApiServices(builder.Configuration)
+    .AddJwtAuthentication(builder.Configuration)
+    .AddAuthorizationPolicies();
 
 var app = builder.Build();
 
