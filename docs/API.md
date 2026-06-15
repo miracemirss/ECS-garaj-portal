@@ -26,6 +26,28 @@ Tüm çözüm derlenir (`dotnet build ECS.sln` → 0 uyarı, 0 hata). Controller
 ```
 Query: `?page=1&pageSize=20` (pageSize üst sınır 200, geçersiz değerler güvenli aralığa çekilir).
 
+## Filtering / sorting / search
+
+Liste endpoint'leri şu ek query parametrelerini kabul eder:
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `search` | Serbest metin; feature'a göre ilgili alanlarda `contains` |
+| `sortBy` | Sıralama alanı (feature bazlı, aşağıda) |
+| `sortDescending` | `true`/`false` (varsayılan: artan) |
+
+Örnek: `GET /api/vehicles?page=1&pageSize=20&search=34&sortBy=plateNo&sortDescending=true`
+
+Desteklenen `sortBy` alanları:
+- **vehicles:** `plateNo`, `brand`, `status`, `odometer`, `createdAt` (arama: plaka, marka)
+- **trailers:** `plateNo`, `trailerType`, `status`, `createdAt` (arama: plaka, tip)
+- **drivers:** `firstName`, `lastName`, `status`, `createdAt` (arama: ad, soyad)
+- **parts:** `partNo`, `name`, `quantity`, `createdAt` (arama: parça no, ad)
+- **maintenanceworkorders:** `workOrderNo`, `status`, `scheduledDate`, `createdAt` (arama: başlık, iş emri no)
+
+Geçersiz `sortBy` → varsayılan `Id` sıralaması. Arama/filtre EF üzerinden
+parametreli sorguya çevrilir (SQL injection riski yok).
+
 ## Hata standardı (Error.Code → HTTP)
 
 | Code | HTTP | Anlam |
@@ -129,8 +151,11 @@ Tüm beklenmeyen hatalar **global `ExceptionHandlingMiddleware`** ile aynı zarf
 | Araç güncel KM | negatif olamaz | Domain (`Vehicle`) |
 | Sonraki bakım KM | mevcut KM'den küçük olamaz | Domain (`RecordMaintenanceCompletion`) |
 | Dorse plaka | zorunlu + unique | `CreateTrailerRequestValidator` + servis + DB |
+| Dorse şasi (VIN) | unique | servis (`AnyAsync`) + DB unique |
+| Dorse lastik ömrü | 0-100 arası | validator (`InclusiveBetween`) + domain (`Trailer`) |
 | Dorse kapasite | negatif olamaz | validator + domain |
 | Şoför ad/soyad | zorunlu | `CreateDriverRequestValidator` |
+| Şoför telefon | format | validator (regex) |
 | Şoför e-posta | format | validator (`EmailAddress`) |
 | İş emri hedef | araç **veya** dorse, ikisi değil | Domain factory (`CreateForVehicle/Trailer`) + DB CHECK |
 | İş emri KM giriş | negatif olamaz | validator + domain |

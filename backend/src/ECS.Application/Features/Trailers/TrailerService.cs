@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using ECS.Application.Common;
 using ECS.Application.Common.Interfaces;
 using ECS.Application.Features.Trailers.Dtos;
@@ -48,7 +49,7 @@ public sealed class TrailerService : ITrailerService
         Trailer trailer;
         try
         {
-            trailer = Trailer.Create(request.PlateNo, request.TrailerType, request.Brand, request.CapacityKg);
+            trailer = Trailer.Create(request.PlateNo, request.TrailerType, request.Brand, request.CapacityKg, request.Vin, request.TireConditionPercent);
         }
         catch (DomainException ex)
         {
@@ -58,6 +59,10 @@ public sealed class TrailerService : ITrailerService
         if (await _trailers.AnyAsync(t => t.PlateNo == trailer.PlateNo, ct))
         {
             return Result.Failure<TrailerDto>(Error.Conflict($"A trailer with plate {trailer.PlateNo} already exists."));
+        }
+        if (trailer.Vin is not null && await _trailers.AnyAsync(t => t.Vin == trailer.Vin, ct))
+        {
+            return Result.Failure<TrailerDto>(Error.Conflict($"A trailer with chassis no {trailer.Vin} already exists."));
         }
 
         await _trailers.AddAsync(trailer, ct);
@@ -83,7 +88,7 @@ public sealed class TrailerService : ITrailerService
 
         try
         {
-            trailer.UpdateDetails(request.TrailerType, request.Brand, request.Model, request.CapacityKg);
+            trailer.UpdateDetails(request.TrailerType, request.Brand, request.Model, request.CapacityKg, request.TireConditionPercent);
         }
         catch (DomainException ex)
         {
@@ -105,11 +110,25 @@ public sealed class TrailerService : ITrailerService
             : Result.Success(MapToDto(trailer));
     }
 
-    public async Task<Result<PagedList<TrailerDto>>> GetPagedAsync(PaginationRequest request, CancellationToken ct = default)
+    public async Task<Result<PagedList<TrailerDto>>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var (items, total) = await _trailers.PagedAsync(t => !t.IsDeleted, request.Skip, request.PageSize, ct);
+        var search = string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim();
+        Expression<Func<Trailer, bool>> predicate = search is null
+            ? t => !t.IsDeleted
+            : t => !t.IsDeleted && (t.PlateNo.Contains(search) || (t.TrailerType != null && t.TrailerType.Contains(search)));
+
+        Expression<Func<Trailer, object>>? orderBy = query.SortBy?.ToLowerInvariant() switch
+        {
+            "plateno" => t => t.PlateNo,
+            "trailertype" => t => t.TrailerType!,
+            "status" => t => t.Status,
+            "createdat" => t => t.CreatedAt,
+            _ => null
+        };
+
+        var (items, total) = await _trailers.PagedAsync(predicate, orderBy, query.SortDescending, query.Skip, query.PageSize, ct);
         var dtos = items.Select(MapToDto).ToList();
-        return Result.Success(new PagedList<TrailerDto>(dtos, total, request.Page, request.PageSize));
+        return Result.Success(new PagedList<TrailerDto>(dtos, total, query.Page, query.PageSize));
     }
 
     public async Task<Result> DeleteAsync(Guid id, CancellationToken ct = default)
@@ -129,5 +148,5 @@ public sealed class TrailerService : ITrailerService
     }
 
     private static TrailerDto MapToDto(Trailer t) => new(
-        t.Id, t.PlateNo, t.TrailerType, t.Brand, t.Status.ToString(), t.CapacityKg);
+        t.Id, t.PlateNo, t.Vin, t.TrailerType, t.Brand, t.Status.ToString(), t.CapacityKg, t.TireConditionPercent);
 }

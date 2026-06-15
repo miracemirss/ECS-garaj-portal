@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using ECS.Application.Common;
 using ECS.Application.Common.Interfaces;
 using ECS.Application.Features.Alerts;
@@ -117,11 +118,25 @@ public sealed class InventoryService : IInventoryService
             : Result.Success(MapPart(part));
     }
 
-    public async Task<Result<PagedList<PartDto>>> GetPartsPagedAsync(PaginationRequest request, CancellationToken ct = default)
+    public async Task<Result<PagedList<PartDto>>> GetPartsPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var (items, total) = await _parts.PagedAsync(p => !p.IsDeleted, request.Skip, request.PageSize, ct);
+        var search = string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim();
+        Expression<Func<Part, bool>> predicate = search is null
+            ? p => !p.IsDeleted
+            : p => !p.IsDeleted && (p.PartNo.Contains(search) || p.Name.Contains(search));
+
+        Expression<Func<Part, object>>? orderBy = query.SortBy?.ToLowerInvariant() switch
+        {
+            "partno" => p => p.PartNo,
+            "name" => p => p.Name,
+            "quantity" => p => p.QuantityInStock,
+            "createdat" => p => p.CreatedAt,
+            _ => null
+        };
+
+        var (items, total) = await _parts.PagedAsync(predicate, orderBy, query.SortDescending, query.Skip, query.PageSize, ct);
         var dtos = items.Select(MapPart).ToList();
-        return Result.Success(new PagedList<PartDto>(dtos, total, request.Page, request.PageSize));
+        return Result.Success(new PagedList<PartDto>(dtos, total, query.Page, query.PageSize));
     }
 
     public async Task<Result<StockMovementDto>> ReceiveStockAsync(ReceiveStockRequest request, CancellationToken ct = default)

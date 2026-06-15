@@ -15,8 +15,11 @@ public sealed class PartsController : ApiControllerBase
     public PartsController(IInventoryService service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-        => RespondPaged(await _service.GetPartsPagedAsync(new PaginationRequest(page, pageSize), ct));
+    public async Task<IActionResult> GetPaged(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null, [FromQuery] string? sortBy = null, [FromQuery] bool sortDescending = false,
+        CancellationToken ct = default)
+        => RespondPaged(await _service.GetPartsPagedAsync(new PagedQuery(page, pageSize, search, sortBy, sortDescending), ct));
 
     [HttpGet("critical")]
     public async Task<IActionResult> GetCritical(CancellationToken ct)

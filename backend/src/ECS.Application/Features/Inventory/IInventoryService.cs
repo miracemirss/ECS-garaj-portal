@@ -9,7 +9,7 @@ public interface IInventoryService
     Task<Result<PartDto>> CreatePartAsync(CreatePartRequest request, CancellationToken ct = default);
     Task<Result<PartDto>> UpdatePartAsync(Guid id, UpdatePartRequest request, CancellationToken ct = default);
     Task<Result<PartDto>> GetPartAsync(Guid id, CancellationToken ct = default);
-    Task<Result<PagedList<PartDto>>> GetPartsPagedAsync(PaginationRequest request, CancellationToken ct = default);
+    Task<Result<PagedList<PartDto>>> GetPartsPagedAsync(PagedQuery query, CancellationToken ct = default);
 
     // Each stock operation runs in a transaction: movement + part balance (+ alert) commit together.
     Task<Result<StockMovementDto>> ReceiveStockAsync(ReceiveStockRequest request, CancellationToken ct = default);

@@ -15,8 +15,11 @@ public sealed class DriversController : ApiControllerBase
     public DriversController(IDriverService service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-        => RespondPaged(await _service.GetPagedAsync(new PaginationRequest(page, pageSize), ct));
+    public async Task<IActionResult> GetPaged(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null, [FromQuery] string? sortBy = null, [FromQuery] bool sortDescending = false,
+        CancellationToken ct = default)
+        => RespondPaged(await _service.GetPagedAsync(new PagedQuery(page, pageSize, search, sortBy, sortDescending), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)

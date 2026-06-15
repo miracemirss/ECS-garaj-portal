@@ -9,6 +9,7 @@ public sealed class CreateTrailerRequestValidator : AbstractValidator<CreateTrai
     {
         RuleFor(x => x.PlateNo).NotEmpty().MaximumLength(16);
         RuleFor(x => x.CapacityKg).GreaterThanOrEqualTo(0).When(x => x.CapacityKg.HasValue);
+        RuleFor(x => x.TireConditionPercent).InclusiveBetween(0, 100).When(x => x.TireConditionPercent.HasValue);
     }
 }
 
@@ -17,5 +18,6 @@ public sealed class UpdateTrailerRequestValidator : AbstractValidator<UpdateTrai
     public UpdateTrailerRequestValidator()
     {
         RuleFor(x => x.CapacityKg).GreaterThanOrEqualTo(0).When(x => x.CapacityKg.HasValue);
+        RuleFor(x => x.TireConditionPercent).InclusiveBetween(0, 100).When(x => x.TireConditionPercent.HasValue);
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using ECS.Application.Common;
 using ECS.Application.Common.Interfaces;
 using ECS.Application.Features.Alerts;
@@ -335,11 +336,25 @@ public sealed class MaintenanceService : IMaintenanceService
         return Result.Success(MapWorkOrder(workOrder, lines));
     }
 
-    public async Task<Result<PagedList<WorkOrderDto>>> GetPagedAsync(PaginationRequest request, CancellationToken ct = default)
+    public async Task<Result<PagedList<WorkOrderDto>>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var (items, total) = await _workOrders.PagedAsync(w => !w.IsDeleted, request.Skip, request.PageSize, ct);
+        var search = string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim();
+        Expression<Func<MaintenanceWorkOrder, bool>> predicate = search is null
+            ? w => !w.IsDeleted
+            : w => !w.IsDeleted && (w.Title.Contains(search) || (w.WorkOrderNo != null && w.WorkOrderNo.Contains(search)));
+
+        Expression<Func<MaintenanceWorkOrder, object>>? orderBy = query.SortBy?.ToLowerInvariant() switch
+        {
+            "workorderno" => w => w.WorkOrderNo!,
+            "status" => w => w.Status,
+            "scheduleddate" => w => w.ScheduledDate!,
+            "createdat" => w => w.CreatedAt,
+            _ => null
+        };
+
+        var (items, total) = await _workOrders.PagedAsync(predicate, orderBy, query.SortDescending, query.Skip, query.PageSize, ct);
         var dtos = items.Select(w => MapWorkOrder(w)).ToList();
-        return Result.Success(new PagedList<WorkOrderDto>(dtos, total, request.Page, request.PageSize));
+        return Result.Success(new PagedList<WorkOrderDto>(dtos, total, query.Page, query.PageSize));
     }
 
     private static WorkOrderDto MapWorkOrder(MaintenanceWorkOrder w, IReadOnlyList<WorkOrderPart>? lines = null)

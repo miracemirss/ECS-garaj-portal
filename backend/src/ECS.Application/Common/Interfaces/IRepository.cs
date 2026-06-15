@@ -16,9 +16,14 @@ public interface IRepository<T> where T : BaseEntity
     Task<IReadOnlyList<T>> ListAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<T>> ListAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
 
-    /// <summary>Ordered (by Id) page plus the total count for the (optional) filter.</summary>
+    /// <summary>Filtered + sorted page (sort by Id when no orderBy given) plus the total count.</summary>
     Task<(IReadOnlyList<T> Items, int TotalCount)> PagedAsync(
-        Expression<Func<T, bool>>? predicate, int skip, int take, CancellationToken cancellationToken = default);
+        Expression<Func<T, bool>>? predicate,
+        Expression<Func<T, object>>? orderBy,
+        bool descending,
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default);
 
     Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default);
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);

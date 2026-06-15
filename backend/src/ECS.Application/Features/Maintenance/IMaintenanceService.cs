@@ -18,5 +18,5 @@ public interface IMaintenanceService
     Task<Result<WorkOrderDto>> CompleteWorkOrderAsync(Guid id, CompleteWorkOrderRequest request, CancellationToken ct = default);
 
     Task<Result<WorkOrderDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
-    Task<Result<PagedList<WorkOrderDto>>> GetPagedAsync(PaginationRequest request, CancellationToken ct = default);
+    Task<Result<PagedList<WorkOrderDto>>> GetPagedAsync(PagedQuery query, CancellationToken ct = default);
 }

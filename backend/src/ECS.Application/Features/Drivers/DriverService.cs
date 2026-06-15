@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using ECS.Application.Common;
 using ECS.Application.Common.Interfaces;
 using ECS.Application.Features.Drivers.Dtos;
@@ -100,11 +101,25 @@ public sealed class DriverService : IDriverService
             : Result.Success(MapToDto(driver));
     }
 
-    public async Task<Result<PagedList<DriverDto>>> GetPagedAsync(PaginationRequest request, CancellationToken ct = default)
+    public async Task<Result<PagedList<DriverDto>>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var (items, total) = await _drivers.PagedAsync(d => !d.IsDeleted, request.Skip, request.PageSize, ct);
+        var search = string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim();
+        Expression<Func<Driver, bool>> predicate = search is null
+            ? d => !d.IsDeleted
+            : d => !d.IsDeleted && (d.FirstName.Contains(search) || d.LastName.Contains(search));
+
+        Expression<Func<Driver, object>>? orderBy = query.SortBy?.ToLowerInvariant() switch
+        {
+            "firstname" => d => d.FirstName,
+            "lastname" => d => d.LastName,
+            "status" => d => d.Status,
+            "createdat" => d => d.CreatedAt,
+            _ => null
+        };
+
+        var (items, total) = await _drivers.PagedAsync(predicate, orderBy, query.SortDescending, query.Skip, query.PageSize, ct);
         var dtos = items.Select(MapToDto).ToList();
-        return Result.Success(new PagedList<DriverDto>(dtos, total, request.Page, request.PageSize));
+        return Result.Success(new PagedList<DriverDto>(dtos, total, query.Page, query.PageSize));
     }
 
     public async Task<Result> DeleteAsync(Guid id, CancellationToken ct = default)

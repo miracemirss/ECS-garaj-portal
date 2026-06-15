@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using ECS.Application.Common;
 using ECS.Application.Common.Interfaces;
 using ECS.Application.Features.Vehicles.Dtos;
@@ -107,11 +108,26 @@ public sealed class VehicleService : IVehicleService
             : Result.Success(MapToDto(vehicle));
     }
 
-    public async Task<Result<PagedList<VehicleDto>>> GetPagedAsync(PaginationRequest request, CancellationToken ct = default)
+    public async Task<Result<PagedList<VehicleDto>>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var (items, total) = await _vehicles.PagedAsync(v => !v.IsDeleted, request.Skip, request.PageSize, ct);
+        var search = string.IsNullOrWhiteSpace(query.Search) ? null : query.Search.Trim();
+        Expression<Func<Vehicle, bool>> predicate = search is null
+            ? v => !v.IsDeleted
+            : v => !v.IsDeleted && (v.PlateNo.Contains(search) || v.Brand.Contains(search));
+
+        Expression<Func<Vehicle, object>>? orderBy = query.SortBy?.ToLowerInvariant() switch
+        {
+            "plateno" => v => v.PlateNo,
+            "brand" => v => v.Brand,
+            "status" => v => v.Status,
+            "odometer" => v => v.CurrentOdometerKm,
+            "createdat" => v => v.CreatedAt,
+            _ => null
+        };
+
+        var (items, total) = await _vehicles.PagedAsync(predicate, orderBy, query.SortDescending, query.Skip, query.PageSize, ct);
         var dtos = items.Select(MapToDto).ToList();
-        return Result.Success(new PagedList<VehicleDto>(dtos, total, request.Page, request.PageSize));
+        return Result.Success(new PagedList<VehicleDto>(dtos, total, query.Page, query.PageSize));
     }
 
     public async Task<Result> DeleteAsync(Guid id, CancellationToken ct = default)

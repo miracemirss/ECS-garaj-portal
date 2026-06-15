@@ -47,12 +47,14 @@ CREATE TABLE vehicles (
 CREATE TABLE trailers (
     id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     plate_no             citext NOT NULL UNIQUE,
+    vin                  text UNIQUE,                -- chassis number
     trailer_type         text,                       -- 'Tent', 'Frigo', 'Lowbed', ...
     brand                text,
     model                text,
     model_year           int,
     status               asset_status NOT NULL DEFAULT 'Active',
     capacity_kg          numeric(12,2),
+    tire_condition_percent int,                      -- tire life 0-100
     purchase_date        date,
     inspection_due_date  date,
     insurance_due_date   date,
@@ -66,7 +68,8 @@ CREATE TABLE trailers (
     deleted_by  uuid REFERENCES users(id) ON DELETE SET NULL,
 
     CONSTRAINT ck_trailers_model_year CHECK (model_year IS NULL OR model_year BETWEEN 1950 AND 2100),
-    CONSTRAINT ck_trailers_capacity   CHECK (capacity_kg IS NULL OR capacity_kg >= 0)
+    CONSTRAINT ck_trailers_capacity   CHECK (capacity_kg IS NULL OR capacity_kg >= 0),
+    CONSTRAINT ck_trailers_tire       CHECK (tire_condition_percent IS NULL OR tire_condition_percent BETWEEN 0 AND 100)
 );
 
 CREATE TABLE drivers (

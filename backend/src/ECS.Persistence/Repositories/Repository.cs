@@ -35,11 +35,21 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         => await Set.Where(predicate).ToListAsync(cancellationToken);
 
     public async Task<(IReadOnlyList<T> Items, int TotalCount)> PagedAsync(
-        Expression<Func<T, bool>>? predicate, int skip, int take, CancellationToken cancellationToken = default)
+        Expression<Func<T, bool>>? predicate,
+        Expression<Func<T, object>>? orderBy,
+        bool descending,
+        int skip,
+        int take,
+        CancellationToken cancellationToken = default)
     {
         var query = predicate is null ? Set : Set.Where(predicate);
         var total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderBy(e => e.Id).Skip(skip).Take(take).ToListAsync(cancellationToken);
+
+        IQueryable<T> ordered = orderBy is null
+            ? query.OrderBy(e => e.Id)
+            : descending ? query.OrderByDescending(orderBy) : query.OrderBy(orderBy);
+
+        var items = await ordered.Skip(skip).Take(take).ToListAsync(cancellationToken);
         return (items, total);
     }
 
