@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace ECS.Persistence.Interceptors;
 
 /// <summary>
-/// Stamps CreatedAt/CreatedBy and ModifiedAt/ModifiedBy on auditable entities
-/// automatically during SaveChanges, using the current user and clock ports.
+/// Stamps CreatedAt/CreatedBy and UpdatedAt/UpdatedBy on auditable entities
+/// automatically during SaveChanges, using the current user id and UTC clock.
 /// </summary>
 public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
 {
@@ -36,19 +36,19 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
     private void ApplyAudit(DbContext context)
     {
         var now = _clock.UtcNow;
-        var user = _currentUser.UserName ?? "system";
+        var userId = _currentUser.UserId;
 
         foreach (var entry in context.ChangeTracker.Entries<AuditableEntity>())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedAtUtc = now;
-                    entry.Entity.CreatedBy = user;
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedBy = userId;
                     break;
                 case EntityState.Modified:
-                    entry.Entity.ModifiedAtUtc = now;
-                    entry.Entity.ModifiedBy = user;
+                    entry.Entity.UpdatedAt = now;
+                    entry.Entity.UpdatedBy = userId;
                     break;
             }
         }

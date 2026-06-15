@@ -43,10 +43,11 @@ backend/
     ├── ECS.Domain/                # (Bağımlılık YOK) En içteki çekirdek
     │   ├── Common/                # BaseEntity, AuditableEntity, AggregateRoot, IDomainEvent
     │   ├── Entities/              # Vehicle, Trailer, Driver, WorkOrder, Part, StockMovement ...
-    │   ├── Enums/                 # EntityType, WorkOrderStatus, StockMovementType, AlertType ...
-    │   ├── ValueObjects/          # PlateNumber, Money, KilometerReading gibi değer nesneleri
-    │   ├── Events/                # WorkOrderCompletedEvent, StockFellBelowMinimumEvent ...
-    │   └── Exceptions/            # DomainException (iş kuralı ihlalleri)
+    │   ├── Enums/                 # TargetType, WorkOrderStatus, StockMovementType, AlertType ...
+    │   ├── ValueObjects/          # ValueObject (base), Money, PlateNumber
+    │   ├── DomainEvents/          # WorkOrderCompletedEvent, StockFellBelowMinimumEvent ...
+    │   ├── Interfaces/            # IAuditableEntity, ISoftDeletable
+    │   └── Exceptions/            # DomainException, InsufficientStockException ...
     │
     ├── ECS.Shared/                # (Bağımlılık YOK) Cross-cutting primitives
     │   ├── Results/               # Result, Result<T>, Error  (hata/başarı sözleşmesi)
@@ -109,9 +110,9 @@ backend/
 | --- | --- | --- |
 | `Common/` | Tüm entity'lerin türediği temel sınıflar | `BaseEntity.cs`, `AuditableEntity.cs`, `AggregateRoot.cs`, `IDomainEvent.cs` |
 | `Entities/` | İş nesneleri ve davranışları | `Vehicle.cs`, `Trailer.cs`, `MaintenanceWorkOrder.cs` |
-| `Enums/` | Sabit kümeler | `WorkOrderStatus.cs`, `EntityType.cs`, `StockMovementType.cs` |
+| `Enums/` | Sabit kümeler | `WorkOrderStatus.cs`, `TargetType.cs`, `StockMovementType.cs` |
 | `ValueObjects/` | Kimliği olmayan değer nesneleri | `PlateNumber.cs`, `Money.cs` |
-| `Events/` | Domain event kayıtları | `WorkOrderCompletedEvent.cs` |
+| `DomainEvents/` | Domain event kayıtları | `WorkOrderCompletedEvent.cs` |
 | `Exceptions/` | İş kuralı ihlal istisnaları | `DomainException.cs` |
 
 ### ECS.Shared — Ortak Primitives (hiçbir şeye bağımlı değil)
