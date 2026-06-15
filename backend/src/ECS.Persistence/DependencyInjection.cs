@@ -2,6 +2,7 @@ using ECS.Application.Common.Interfaces;
 using ECS.Persistence.Contexts;
 using ECS.Persistence.Interceptors;
 using ECS.Persistence.Repositories;
+using ECS.Persistence.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<INumberGenerator, NumberGenerator>();
 
         return services;
     }

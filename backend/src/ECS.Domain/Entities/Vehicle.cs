@@ -96,6 +96,22 @@ public class Vehicle : AggregateRoot
         NextMaintenanceDate = MaintenanceIntervalDays.HasValue ? today.AddDays(MaintenanceIntervalDays.Value) : null;
     }
 
+    public void UpdateDetails(string brand, string? model, int? modelYear, string? color)
+    {
+        if (string.IsNullOrWhiteSpace(brand))
+        {
+            throw new DomainException("Vehicle brand is required.");
+        }
+        if (modelYear is < 1950 or > 2100)
+        {
+            throw new DomainException("Vehicle model year is out of range.");
+        }
+        Brand = brand.Trim();
+        Model = model?.Trim();
+        ModelYear = modelYear;
+        Color = color?.Trim();
+    }
+
     public void ChangeStatus(VehicleStatus status) => Status = status;
 
     public void SetComplianceDates(DateOnly? inspectionDue, DateOnly? insuranceDue)

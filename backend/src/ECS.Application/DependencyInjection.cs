@@ -1,4 +1,12 @@
 using System.Reflection;
+using ECS.Application.Features.Alerts;
+using ECS.Application.Features.Assignments;
+using ECS.Application.Features.Drivers;
+using ECS.Application.Features.Inventory;
+using ECS.Application.Features.Maintenance;
+using ECS.Application.Features.Reports;
+using ECS.Application.Features.Trailers;
+using ECS.Application.Features.Vehicles;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -7,7 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ECS.Application;
 
 /// <summary>
-/// Registers Application-layer services. Called from the API composition root.
+/// Registers Application-layer services, validators and the mapper.
+/// Called from the API composition root.
 /// </summary>
 public static class DependencyInjection
 {
@@ -24,9 +33,15 @@ public static class DependencyInjection
         services.AddSingleton(typeAdapterConfig);
         services.AddScoped<IMapper, ServiceMapper>();
 
-        // Feature application services are registered here as they are built, e.g.:
-        // services.AddScoped<IVehicleService, VehicleService>();
-        // services.AddScoped<IMaintenanceService, MaintenanceService>();
+        // Feature application services.
+        services.AddScoped<IVehicleService, VehicleService>();
+        services.AddScoped<ITrailerService, TrailerService>();
+        services.AddScoped<IDriverService, DriverService>();
+        services.AddScoped<IAssignmentService, AssignmentService>();
+        services.AddScoped<IMaintenanceService, MaintenanceService>();
+        services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IAlertService, AlertService>();
+        services.AddScoped<IReportService, ReportService>();
 
         return services;
     }

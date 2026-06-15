@@ -94,6 +94,20 @@ public class MaintenanceWorkOrder : AggregateRoot
     public void SetSupplier(Guid? supplierId) => SupplierId = supplierId;
     public void SetDescription(string? description) => Description = description;
 
+    public void UpdateDetails(string title, string? description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new DomainException("Work order title is required.");
+        }
+        if (Status is WorkOrderStatus.Completed or WorkOrderStatus.Cancelled)
+        {
+            throw new InvalidWorkOrderStateException($"Cannot edit a {Status} work order.");
+        }
+        Title = title.Trim();
+        Description = description;
+    }
+
     public void Start(DateTime utcNow)
     {
         if (Status is not (WorkOrderStatus.Draft or WorkOrderStatus.Open))
@@ -117,7 +131,7 @@ public class MaintenanceWorkOrder : AggregateRoot
 
         var line = WorkOrderPart.Create(Id, partId, quantity, unitCost, stockMovementId);
         _parts.Add(line);
-        RecalculatePartsCost();
+        PartsCost += line.LineTotal;   // incremental; correct without loading the whole collection
         return line;
     }
 
@@ -158,7 +172,8 @@ public class MaintenanceWorkOrder : AggregateRoot
         Status = WorkOrderStatus.Cancelled;
     }
 
-    private void RecalculatePartsCost() => PartsCost = _parts.Sum(p => p.LineTotal);
+    /// <summary>Recomputes parts cost from the loaded lines (use when the full collection is loaded).</summary>
+    public void RecalculatePartsCost() => PartsCost = _parts.Sum(p => p.LineTotal);
 
     private static void ValidateTitle(string title)
     {

@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IPdfService, QuestPdfReportService>();
         services.AddScoped<IExcelService, ClosedXmlExportService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
 
         // Background jobs are registered here as they are built, e.g.:
         // services.AddHostedService<CriticalStockAlertJob>();

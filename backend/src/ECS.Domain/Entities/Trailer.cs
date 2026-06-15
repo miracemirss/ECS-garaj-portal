@@ -42,6 +42,18 @@ public class Trailer : AggregateRoot
         };
     }
 
+    public void UpdateDetails(string? trailerType, string? brand, string? model, decimal? capacityKg)
+    {
+        if (capacityKg is < 0)
+        {
+            throw new DomainException("Capacity cannot be negative.");
+        }
+        TrailerType = trailerType?.Trim();
+        Brand = brand?.Trim();
+        Model = model?.Trim();
+        CapacityKg = capacityKg;
+    }
+
     public void ChangeStatus(TrailerStatus status) => Status = status;
 
     public void SetComplianceDates(DateOnly? inspectionDue, DateOnly? insuranceDue)
