@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ECS.Shared - technology-agnostic cross-cutting primitives. No references. -->
+
+</Project>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    ECS.Domain - innermost layer of Clean Architecture.
+    It has NO project references and NO framework NuGet packages on purpose:
+    the business core must stay independent of EF Core, ASP.NET, etc.
+  -->
+
+</Project>
