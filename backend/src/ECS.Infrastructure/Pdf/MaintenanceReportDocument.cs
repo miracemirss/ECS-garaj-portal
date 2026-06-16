@@ -50,7 +50,7 @@ public sealed class MaintenanceReportDocument : IDocument
         Creator = _m.Company.Name
     };
 
-    public DocumentSettings GetSettings() => DocumentSettings.Default;
+    public DocumentSettings GetSettings() => new();
 
     public void Compose(IDocumentContainer container)
     {
