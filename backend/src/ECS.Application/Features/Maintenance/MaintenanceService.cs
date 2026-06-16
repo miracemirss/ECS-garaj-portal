@@ -10,6 +10,7 @@ using ECS.Domain.Exceptions;
 using ECS.Shared.Pagination;
 using ECS.Shared.Results;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace ECS.Application.Features.Maintenance;
 
@@ -29,6 +30,7 @@ public sealed class MaintenanceService : IMaintenanceService
     private readonly IAlertService _alerts;
     private readonly INumberGenerator _numbers;
     private readonly IReportService _reportService;
+    private readonly ILogger<MaintenanceService> _logger;
     private readonly IValidator<CreateWorkOrderRequest> _createValidator;
     private readonly IValidator<UpdateWorkOrderRequest> _updateValidator;
     private readonly IValidator<AddWorkOrderPartRequest> _addPartValidator;
@@ -48,6 +50,7 @@ public sealed class MaintenanceService : IMaintenanceService
         IAlertService alerts,
         INumberGenerator numbers,
         IReportService reportService,
+        ILogger<MaintenanceService> logger,
         IValidator<CreateWorkOrderRequest> createValidator,
         IValidator<UpdateWorkOrderRequest> updateValidator,
         IValidator<AddWorkOrderPartRequest> addPartValidator)
@@ -66,6 +69,7 @@ public sealed class MaintenanceService : IMaintenanceService
         _alerts = alerts;
         _numbers = numbers;
         _reportService = reportService;
+        _logger = logger;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _addPartValidator = addPartValidator;
@@ -310,15 +314,26 @@ public sealed class MaintenanceService : IMaintenanceService
             new { workOrder.WorkOrderNo, workOrder.TotalCost }, ct);
         await tx.CommitAsync(ct);
 
-        // PDF report is IO, generated AFTER the DB transaction commits (best-effort;
-        // can be regenerated on demand). Completion never depends on PDF success.
+        // The PDF report is IO and is generated AFTER the DB transaction commits.
+        // Completion NEVER depends on PDF success: a failure here is logged and audited
+        // (so it is observable and can be retried via POST /api/reports/maintenance/{id})
+        // but the work order stays completed.
         try
         {
-            await _reportService.GenerateMaintenanceReportAsync(workOrder.Id, ct);
+            var report = await _reportService.GenerateMaintenanceReportAsync(workOrder.Id, ct);
+            if (report.IsFailure)
+            {
+                _logger.LogWarning("Maintenance report generation failed for work order {WorkOrderId}: {Error}",
+                    workOrder.Id, report.Error.Message);
+                await _audit.LogAsync("MaintenanceReportGenerationFailed", nameof(MaintenanceWorkOrder),
+                    workOrder.Id.ToString(), new { workOrder.WorkOrderNo, report.Error.Message }, ct);
+            }
         }
-        catch
+        catch (Exception ex)
         {
-            // Swallowed intentionally: the work order is already completed and audited.
+            _logger.LogError(ex, "Unexpected error generating maintenance report for work order {WorkOrderId}.", workOrder.Id);
+            await _audit.LogAsync("MaintenanceReportGenerationFailed", nameof(MaintenanceWorkOrder),
+                workOrder.Id.ToString(), new { workOrder.WorkOrderNo, Error = ex.Message }, ct);
         }
 
         return Result.Success(MapWorkOrder(workOrder));
