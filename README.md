@@ -3,12 +3,9 @@
 Lojistik / taşımacılık firmaları için geliştirilen **stok entegreli araç, dorse,
 şoför, bakım-onarım ve envanter yönetim sistemi**.
 
-> Bu repo **parçalı geliştirme prompt paketi** ile kurulmaktadır.
-> Bu commit **PROMPT 1 — Proje Mimarisi ve Dosya Yapısı** çıktısıdır:
-> tüm katmanlar, klasör yapısı, temel soyutlamalar (base entity, Result, port
-> interface'leri, DI iskeleti) ve mimari dokümantasyon oluşturulmuştur.
-> İş kuralları, entity'ler ve özellikler sonraki prompt'larda bu iskelet
-> üzerine inşa edilecektir.
+> Bu repo **parçalı geliştirme prompt paketi** ile kurulmuştur: mimari (P1), DB
+> şeması (P2), domain (P3), iş servisleri (P4), REST API (P5), frontend (P6),
+> **PDF bakım raporu (P7)** ve **test / seed / Docker / deployment (P8)**.
 
 ## Teknoloji Yığını (Stack)
 
@@ -53,14 +50,37 @@ ECS-garaj-portal/
     └── DOMAIN_RULES.md   # İş kurallarının hangi katmanda nasıl uygulanacağı
 ```
 
-Detaylı mimari için **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**,
-iş kurallarının katman eşlemesi için **[docs/DOMAIN_RULES.md](docs/DOMAIN_RULES.md)**.
+Belgeler:
+**[ARCHITECTURE](docs/ARCHITECTURE.md)** ·
+**[DOMAIN_RULES](docs/DOMAIN_RULES.md)** ·
+**[API](docs/API.md)** ·
+**[SERVICES](docs/SERVICES.md)** ·
+**[FRONTEND](docs/FRONTEND.md)** ·
+**[REPORTING (PDF)](docs/REPORTING.md)** ·
+**[TESTING](docs/TESTING.md)** ·
+**[DEPLOYMENT](docs/DEPLOYMENT.md)**.
 
 ## Gereksinimler
 
 - .NET 8 SDK
 - Node.js 20+ / npm 10+
 - PostgreSQL 14+
+- (opsiyonel) Docker + Docker Compose
+
+## Docker ile Hızlı Başlangıç
+
+Tüm yığını (PostgreSQL + migration + backend + frontend) tek komutla çalıştırın:
+
+```bash
+cp .env.example .env          # JWT_SIGNING_KEY ve POSTGRES_PASSWORD'u doldurun
+docker compose up -d --build
+# Demo veriyle (yalnızca non-prod): RUN_DEMO_SEED=true docker compose up -d --build
+```
+
+- Uygulama: http://localhost:8080  ·  API: http://localhost:5080  ·  Sağlık: `/health`
+- `migrator` servisi `database/migrations/*.sql`'i sırayla uygular (şema varsa atlar).
+
+Detaylar: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ## Çalıştırma
 
@@ -86,6 +106,16 @@ cp .env.example .env          # VITE_API_BASE_URL değerini gerekirse güncelley
 npm install
 npm run dev                   # http://localhost:5173
 ```
+
+### Test
+
+```bash
+cd backend
+dotnet test                                    # domain + application birim testleri
+dotnet test --collect:"XPlat Code Coverage"    # kapsama (coverlet)
+```
+
+Test planı ve kritik senaryo eşlemesi: **[docs/TESTING.md](docs/TESTING.md)**.
 
 ## Geliştirme Dalı
 

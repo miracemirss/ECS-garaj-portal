@@ -34,6 +34,10 @@ app.UseHttpsRedirection();
 app.UseCors("Default");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Lightweight, anonymous liveness probe for containers / load balancers.
+app.MapGet("/health", () => Results.Ok(new { status = "ok", utc = DateTime.UtcNow }));
+
 app.MapControllers();
 
 app.Run();
