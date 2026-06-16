@@ -18,7 +18,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<AuditableEntityInterceptor>();
+        // Scoped: the interceptor depends on the scoped ICurrentUserService, and is
+        // resolved per-context from the scoped provider in the AddDbContext action below.
+        services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
