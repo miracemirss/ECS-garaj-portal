@@ -1,18 +1,17 @@
 import { Outlet } from 'react-router-dom'
-import { APP_NAME } from '@/lib/constants'
+import { Sidebar } from './Sidebar'
+import { Topbar } from './Topbar'
 
-/**
- * Application shell. Sidebar/topbar navigation is added with the dashboard prompt.
- */
 export function AppLayout() {
   return (
-    <div className="min-h-screen">
-      <header className="border-b px-6 py-4">
-        <h1 className="text-lg font-semibold">{APP_NAME}</h1>
-      </header>
-      <main className="mx-auto max-w-7xl">
-        <Outlet />
-      </main>
+    <div className="flex h-screen overflow-hidden bg-surface">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Topbar />
+        <main className="flex-1 overflow-y-auto p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }

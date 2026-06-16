@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
 import { env } from '@/lib/env'
 import { useAuthStore } from '@/features/auth/store'
 
@@ -11,7 +11,6 @@ export const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Attach the access token to every request.
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken
   if (token) {
@@ -20,8 +19,50 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Normalize errors; the refresh-token flow is wired up in the auth prompt.
+let refreshing: Promise<string | null> | null = null
+
+async function refreshAccessToken(): Promise<string | null> {
+  const { refreshToken, setTokens, clear } = useAuthStore.getState()
+  if (!refreshToken) {
+    clear()
+    return null
+  }
+  try {
+    const res = await axios.post(`${env.apiBaseUrl}/auth/refresh`, { refreshToken })
+    const data = res.data?.data
+    if (data?.accessToken) {
+      setTokens(data.accessToken, data.refreshToken)
+      return data.accessToken as string
+    }
+  } catch {
+    /* fall through */
+  }
+  clear()
+  return null
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  async (error: AxiosError) => {
+    const original = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined
+    const status = error.response?.status
+    const url = original?.url ?? ''
+
+    if (status === 401 && original && !original._retry && !url.includes('/auth/')) {
+      original._retry = true
+      refreshing = refreshing ?? refreshAccessToken()
+      const token = await refreshing
+      refreshing = null
+
+      if (token) {
+        original.headers = { ...original.headers, Authorization: `Bearer ${token}` }
+        return apiClient(original)
+      }
+      if (typeof window !== 'undefined') {
+        window.location.assign('/login')
+      }
+    }
+
+    return Promise.reject(error)
+  },
 )
