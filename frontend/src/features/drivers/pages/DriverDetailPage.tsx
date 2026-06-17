@@ -28,14 +28,25 @@ export function DriverDetailPage() {
       <Breadcrumb items={[{ label: 'Şoförler', to: '/drivers' }, { label: driver.fullName }]} />
       <PageHeader title={driver.fullName} description="Şoför detayı" />
       <Card>
-        <CardContent className="grid grid-cols-2 gap-5 p-6 sm:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Ad Soyad">{driver.fullName}</Field>
           <Field label="TC Kimlik">{driver.nationalId ?? '—'}</Field>
           <Field label="Durum"><StatusBadge status={driver.status} /></Field>
           <Field label="Telefon">{driver.phone ?? '—'}</Field>
           <Field label="E-posta">{driver.email ?? '—'}</Field>
           <Field label="Ehliyet No">{driver.licenseNo ?? '—'}</Field>
+          <Field label="Ehliyet Sınıfı">{driver.licenseClass ?? '—'}</Field>
+          <Field label="Ehliyet Başlangıç">{formatDate(driver.licenseStartDate)}</Field>
           <Field label="Ehliyet Bitiş">{formatDate(driver.licenseExpiryDate)}</Field>
+          <Field label="SRC Başlangıç">{formatDate(driver.srcStartDate)}</Field>
+          <Field label="SRC Bitiş">{formatDate(driver.srcEndDate)}</Field>
+          <Field label="Psikoteknik Başlangıç">{formatDate(driver.psychotechnicalStartDate)}</Field>
+          <Field label="Psikoteknik Bitiş">{formatDate(driver.psychotechnicalEndDate)}</Field>
+          <Field label="Vize Başlangıç">{formatDate(driver.visaStartDate)}</Field>
+          <Field label="Vize Bitiş">{formatDate(driver.visaEndDate)}</Field>
+          <Field label="Pasaport Başlangıç">{formatDate(driver.passportStartDate)}</Field>
+          <Field label="Pasaport Bitiş">{formatDate(driver.passportEndDate)}</Field>
+          <Field label="Belge Notu">{driver.documentNote ?? '—'}</Field>
         </CardContent>
       </Card>
     </div>

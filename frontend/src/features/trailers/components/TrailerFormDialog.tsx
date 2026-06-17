@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { FormInput } from '@/components/common/FormInput'
+import { FormSelect } from '@/components/common/FormSelect'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { TRAILER_TYPE_OPTIONS } from '@/lib/options'
 import type { Trailer } from '@/types/models'
 import { useCreateTrailer, useUpdateTrailer } from '../hooks'
 
@@ -71,11 +73,11 @@ export function TrailerFormDialog({ open, onOpenChange, trailer }: Props) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <FormInput label="Plaka" disabled={isEdit} error={errors.plateNo?.message} {...register('plateNo')} />
-          <div className="grid grid-cols-2 gap-3">
-            <FormInput label="Tip" error={errors.trailerType?.message} {...register('trailerType')} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <FormSelect label="Dorse Türü" placeholder="Seçin" options={TRAILER_TYPE_OPTIONS} error={errors.trailerType?.message} {...register('trailerType')} />
             <FormInput label="Marka" error={errors.brand?.message} {...register('brand')} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormInput label="Kapasite (kg)" inputMode="numeric" error={errors.capacityKg?.message} {...register('capacityKg')} />
             <FormInput label="Lastik Ömrü (%)" inputMode="numeric" error={errors.tireConditionPercent?.message} {...register('tireConditionPercent')} />
           </div>

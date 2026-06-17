@@ -45,7 +45,7 @@ export function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-            <FormInput label="E-posta" type="email" placeholder="admin@ecs.local" error={errors.email?.message} {...register('email')} />
+            <FormInput label="E-posta" type="email" placeholder="admin@ecslog.com" error={errors.email?.message} {...register('email')} />
             <FormInput label="Parola" type="password" placeholder="••••••••" error={errors.password?.message} {...register('password')} />
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? 'Giriş yapılıyor...' : 'Giriş Yap'}

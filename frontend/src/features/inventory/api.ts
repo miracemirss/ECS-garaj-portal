@@ -6,6 +6,7 @@ export interface CreatePartRequest {
   partNo: string
   name: string
   unit?: string
+  initialStock?: number
   minimumStock?: number
   unitCost?: number
 }

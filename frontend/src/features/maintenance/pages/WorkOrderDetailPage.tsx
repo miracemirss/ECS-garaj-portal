@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { FormInput } from '@/components/common/FormInput'
 import { EmptyState } from '@/components/common/EmptyState'
 import { formatCurrency } from '@/lib/formatters'
+import { getEnumLabel } from '@/types/enums'
 import { AddPartDialog } from '../components/AddPartDialog'
 import { useCompleteWorkOrder, useStartWorkOrder, useWorkOrder } from '../hooks'
 
@@ -70,8 +71,8 @@ export function WorkOrderDetailPage() {
         <Card className="lg:col-span-1">
           <CardContent className="grid grid-cols-2 gap-4 p-6">
             <Field label="Durum"><StatusBadge status={wo.status} /></Field>
-            <Field label="Tip">{wo.maintenanceType}</Field>
-            <Field label="Hedef">{wo.targetType}</Field>
+            <Field label="Tip">{getEnumLabel(wo.maintenanceType)}</Field>
+            <Field label="Hedef">{getEnumLabel(wo.targetType)}</Field>
             <Field label="KM (giriş)">{wo.odometerBeforeKm ?? '—'}</Field>
             <Field label="KM (çıkış)">{wo.odometerAfterKm ?? '—'}</Field>
             <Field label="İşçilik">{formatCurrency(wo.laborCost)}</Field>

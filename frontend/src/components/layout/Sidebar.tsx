@@ -12,9 +12,11 @@ import {
   Truck,
   Users,
   Wrench,
+  X,
   type LucideIcon,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import { APP_NAME } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -22,6 +24,11 @@ interface NavItem {
   to: string
   label: string
   icon: LucideIcon
+}
+
+interface SidebarProps {
+  mobileOpen?: boolean
+  onMobileOpenChange?: (open: boolean) => void
 }
 
 const NAV: { group: string; items: NavItem[] }[] = [
@@ -55,9 +62,9 @@ const NAV: { group: string; items: NavItem[] }[] = [
   { group: 'Sistem', items: [{ to: '/settings', label: 'Ayarlar', icon: Settings }] },
 ]
 
-export function Sidebar() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r bg-card md:flex">
+    <>
       <div className="flex h-14 items-center gap-2 border-b px-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
           E
@@ -75,21 +82,50 @@ export function Sidebar() {
                 <NavLink
                   key={item.to}
                   to={item.to}
+                  onClick={onNavigate}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
+                      'flex min-h-10 items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
                       isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                     )
                   }
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </NavLink>
               ))}
             </div>
           </div>
         ))}
       </nav>
-    </aside>
+    </>
+  )
+}
+
+export function Sidebar({ mobileOpen = false, onMobileOpenChange }: SidebarProps) {
+  return (
+    <>
+      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card md:flex">
+        <SidebarContent />
+      </aside>
+
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => onMobileOpenChange?.(false)} aria-hidden />
+          <aside className="relative flex h-full w-[min(18rem,85vw)] flex-col border-r bg-card shadow-xl">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2"
+              onClick={() => onMobileOpenChange?.(false)}
+              aria-label="Menüyü kapat"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            <SidebarContent onNavigate={() => onMobileOpenChange?.(false)} />
+          </aside>
+        </div>
+      )}
+    </>
   )
 }

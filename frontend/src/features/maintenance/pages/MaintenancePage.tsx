@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { useListState } from '@/hooks/useListState'
 import { formatCurrency, formatDate } from '@/lib/formatters'
+import { getEnumLabel } from '@/types/enums'
 import type { WorkOrder } from '@/types/models'
 import { WorkOrderFormDialog } from '../components/WorkOrderFormDialog'
 import { useWorkOrders } from '../hooks'
@@ -21,8 +22,8 @@ export function MaintenancePage() {
   const columns: Column<WorkOrder>[] = [
     { key: 'workOrderNo', header: 'No', sortable: true, cell: (w) => <span className="font-medium">{w.workOrderNo ?? '—'}</span> },
     { key: 'title', header: 'Başlık', cell: (w) => w.title },
-    { key: 'targetType', header: 'Hedef', cell: (w) => w.targetType },
-    { key: 'maintenanceType', header: 'Tip', cell: (w) => w.maintenanceType },
+    { key: 'targetType', header: 'Hedef', cell: (w) => getEnumLabel(w.targetType) },
+    { key: 'maintenanceType', header: 'Tip', cell: (w) => getEnumLabel(w.maintenanceType) },
     { key: 'totalCost', header: 'Toplam', cell: (w) => formatCurrency(w.totalCost) },
     { key: 'scheduledDate', header: 'Planlanan', sortable: true, cell: (w) => formatDate(w.scheduledDate) },
     { key: 'status', header: 'Durum', sortable: true, cell: (w) => <StatusBadge status={w.status} /> },

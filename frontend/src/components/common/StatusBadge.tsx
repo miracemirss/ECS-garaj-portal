@@ -1,4 +1,5 @@
 import { Badge, type BadgeProps } from '@/components/ui/badge'
+import { getEnumLabel } from '@/types/enums'
 
 type Variant = NonNullable<BadgeProps['variant']>
 
@@ -33,5 +34,5 @@ const VARIANT_BY_STATUS: Record<string, Variant> = {
 
 export function StatusBadge({ status }: { status?: string | null }) {
   if (!status) return <Badge variant="neutral">—</Badge>
-  return <Badge variant={VARIANT_BY_STATUS[status] ?? 'neutral'}>{status}</Badge>
+  return <Badge variant={VARIANT_BY_STATUS[status] ?? 'neutral'}>{getEnumLabel(status)}</Badge>
 }

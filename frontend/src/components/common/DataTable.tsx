@@ -107,9 +107,9 @@ export function DataTable<T>({
       </Table>
 
       {showPagination && (
-        <div className="flex items-center justify-between border-t px-3 py-2 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-2 border-t px-3 py-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>{totalCount != null ? `${totalCount} kayıt` : ''}</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span>
               Sayfa {page} / {Math.max(totalPages ?? 1, 1)}
             </span>

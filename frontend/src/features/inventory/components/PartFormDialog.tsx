@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { FormInput } from '@/components/common/FormInput'
+import { FormSelect } from '@/components/common/FormSelect'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { PART_UNIT_OPTIONS } from '@/lib/options'
 import type { Part } from '@/types/models'
 import { useCreatePart, useUpdatePart } from '../hooks'
 
@@ -13,7 +15,8 @@ const numeric = (msg: string) => z.string().optional().refine((v) => !v || (!Num
 const schema = z.object({
   partNo: z.string().min(1, 'Parça kodu zorunlu'),
   name: z.string().min(1, 'Parça adı zorunlu'),
-  unit: z.string().optional(),
+  unit: z.string().min(1, 'Birim seçin'),
+  initialStock: numeric('Geçerli değer girin'),
   minimumStock: numeric('Geçerli değer girin'),
   unitCost: numeric('Geçerli değer girin'),
 })
@@ -36,7 +39,8 @@ export function PartFormDialog({ open, onOpenChange, part }: Props) {
       reset({
         partNo: part?.partNo ?? '',
         name: part?.name ?? '',
-        unit: part?.unit ?? 'pcs',
+        unit: part?.unit ?? 'Adet',
+        initialStock: '0',
         minimumStock: part?.minimumStock != null ? String(part.minimumStock) : '0',
         unitCost: part?.unitCost != null ? String(part.unitCost) : '0',
       })
@@ -46,11 +50,12 @@ export function PartFormDialog({ open, onOpenChange, part }: Props) {
   async function onSubmit(values: FormValues) {
     const minimumStock = values.minimumStock ? Number(values.minimumStock) : 0
     const unitCost = values.unitCost ? Number(values.unitCost) : 0
+    const initialStock = values.initialStock ? Number(values.initialStock) : 0
     try {
       if (isEdit && part) {
         await update.mutateAsync({ id: part.id, body: { name: values.name, minimumStock, unitCost } })
       } else {
-        await create.mutateAsync({ partNo: values.partNo, name: values.name, unit: values.unit || 'pcs', minimumStock, unitCost })
+        await create.mutateAsync({ partNo: values.partNo, name: values.name, unit: values.unit, initialStock, minimumStock, unitCost })
       }
       onOpenChange(false)
     } catch {
@@ -67,13 +72,18 @@ export function PartFormDialog({ open, onOpenChange, part }: Props) {
           <DialogTitle>{isEdit ? 'Parçayı Düzenle' : 'Yeni Parça'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormInput label="Parça Kodu" disabled={isEdit} error={errors.partNo?.message} {...register('partNo')} />
-            <FormInput label="Birim" error={errors.unit?.message} {...register('unit')} />
+            <FormSelect label="Birim" disabled={isEdit} options={PART_UNIT_OPTIONS} error={errors.unit?.message} {...register('unit')} />
           </div>
           <FormInput label="Parça Adı" error={errors.name?.message} {...register('name')} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {!isEdit && (
+              <FormInput label="Başlangıç Stok" inputMode="decimal" error={errors.initialStock?.message} {...register('initialStock')} />
+            )}
             <FormInput label="Minimum Stok" inputMode="decimal" error={errors.minimumStock?.message} {...register('minimumStock')} />
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <FormInput label="Birim Maliyet" inputMode="decimal" error={errors.unitCost?.message} {...register('unitCost')} />
           </div>
           <DialogFooter>

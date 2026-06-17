@@ -48,7 +48,18 @@ export interface Driver {
   email?: string | null
   status: string
   licenseNo?: string | null
+  licenseClass?: string | null
+  licenseStartDate?: string | null
   licenseExpiryDate?: string | null
+  srcStartDate?: string | null
+  srcEndDate?: string | null
+  psychotechnicalStartDate?: string | null
+  psychotechnicalEndDate?: string | null
+  visaStartDate?: string | null
+  visaEndDate?: string | null
+  passportStartDate?: string | null
+  passportEndDate?: string | null
+  documentNote?: string | null
 }
 
 export interface WorkOrderPart {

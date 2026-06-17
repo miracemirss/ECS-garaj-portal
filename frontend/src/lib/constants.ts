@@ -1,5 +1,5 @@
-export const APP_NAME = 'ECS Fleet'
-export const APP_FULL_NAME = 'ECS Fleet Maintenance & Inventory'
+export const APP_NAME = 'ECS Garaj'
+export const APP_FULL_NAME = 'ECS Garaj Bakım ve Stok Yönetimi'
 
 /** TanStack Query cache keys (single source of truth). */
 export const queryKeys = {

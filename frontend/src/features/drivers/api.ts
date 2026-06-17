@@ -8,6 +8,19 @@ export interface CreateDriverRequest {
   nationalId?: string
   phone?: string
   email?: string
+  licenseNo?: string
+  licenseClass?: string
+  licenseStartDate?: string
+  licenseExpiryDate?: string
+  srcStartDate?: string
+  srcEndDate?: string
+  psychotechnicalStartDate?: string
+  psychotechnicalEndDate?: string
+  visaStartDate?: string
+  visaEndDate?: string
+  passportStartDate?: string
+  passportEndDate?: string
+  documentNote?: string
 }
 
 export interface UpdateDriverRequest {
@@ -15,7 +28,17 @@ export interface UpdateDriverRequest {
   email?: string
   licenseNo?: string
   licenseClass?: string
+  licenseStartDate?: string
   licenseExpiryDate?: string
+  srcStartDate?: string
+  srcEndDate?: string
+  psychotechnicalStartDate?: string
+  psychotechnicalEndDate?: string
+  visaStartDate?: string
+  visaEndDate?: string
+  passportStartDate?: string
+  passportEndDate?: string
+  documentNote?: string
 }
 
 export const driversApi = {
