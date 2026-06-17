@@ -2,7 +2,9 @@ using System.Reflection;
 using System.Text;
 using ECS.Domain.Common;
 using ECS.Domain.Entities;
+using ECS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.NameTranslation;
 
 namespace ECS.Persistence.Contexts;
 
@@ -41,6 +43,27 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Declare the native PostgreSQL enum types (migration 0001) in the EF model.
+        // Without this, EF maps enum properties to integer and INSERTs fail with
+        // "column ... is of type asset_status but expression is of type integer".
+        // The ADO-level CLR<->enum serialization is configured on the NpgsqlDataSource
+        // (DependencyInjection.MapEnum). Labels are PascalCase, so keep them verbatim.
+        // One declaration per distinct PG type; asset_status is shared by Vehicle &
+        // Trailer (both already mapped on the data source).
+        var keepNames = new NpgsqlNullNameTranslator();
+        modelBuilder.HasPostgresEnum<VehicleStatus>(name: "asset_status", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<DriverStatus>(name: "driver_status", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<AssignmentStatus>(name: "assignment_status", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<TargetType>(name: "work_order_target_type", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<WorkOrderType>(name: "maintenance_type", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<WorkOrderStatus>(name: "work_order_status", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<StockMovementType>(name: "stock_movement_type", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<AlertType>(name: "alert_type", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<AlertPriority>(name: "alert_severity", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<AlertStatus>(name: "alert_status", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<DocumentOwnerType>(name: "document_owner_type", nameTranslator: keepNames);
+        modelBuilder.HasPostgresEnum<DocumentType>(name: "document_type", nameTranslator: keepNames);
+
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Domain-event collections are never persisted; detach them before validation.
