@@ -22,6 +22,7 @@ Dosyalar isimlerindeki numara sırasına göre çalıştırılır:
 | 0009 | `0009_functions_and_triggers.sql` | Tüm function ve trigger'lar |
 | 0010 | `0010_views.sql` | 13 raporlama view'ı |
 | 0011 | `0011_seed.sql` | Roller, admin kullanıcı, company_settings, varsayılan depo (idempotent) |
+| 0012 | `0012_soft_delete_partial_unique.sql` | Soft-delete uyumlu **partial unique index**'ler (plaka, VIN, TC, parça kodu) |
 
 ## Çalıştırma
 

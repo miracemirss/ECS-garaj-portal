@@ -40,10 +40,10 @@ public sealed class ExceptionHandlingMiddleware
         var traceId = context.TraceIdentifier;
         var (status, message, errors) = exception switch
         {
-            ValidationException ve => (HttpStatusCode.BadRequest, "Validation failed", (object?)ve.Errors),
+            ValidationException ve => (HttpStatusCode.BadRequest, "Doğrulama hatası.", (object?)ve.Errors),
             NotFoundException => (HttpStatusCode.NotFound, exception.Message, null),
             DomainException => (HttpStatusCode.Conflict, exception.Message, null),
-            _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred", null)
+            _ => TranslateDatabaseError(exception)
         };
 
         if (status == HttpStatusCode.InternalServerError)
@@ -56,6 +56,36 @@ public sealed class ExceptionHandlingMiddleware
 
         var payload = ApiResponse.Failure(message, errors, (int)status, traceId);
         await context.Response.WriteAsync(JsonSerializer.Serialize(payload, JsonOptions));
+    }
+
+    /// <summary>
+    /// Veritabanı kısıtı ihlallerini (PostgreSQL) anlamlı HTTP durum kodlarına çevirir.
+    /// Böylece benzersizlik/CHECK/foreign-key ihlalleri kullanıcıya 500 yerine 409/400
+    /// olarak Türkçe mesajla döner. PostgreSQL'e doğrudan tip bağımlılığı eklememek için
+    /// inner exception'ın SqlState değeri reflection ile okunur.
+    /// </summary>
+    private static (HttpStatusCode, string, object?) TranslateDatabaseError(Exception exception)
+    {
+        var sqlState = ExtractSqlState(exception);
+        return sqlState switch
+        {
+            "23505" => (HttpStatusCode.Conflict, "Bu kayıt zaten mevcut. Benzersizlik kuralı ihlal edildi.", null),
+            "23503" => (HttpStatusCode.BadRequest, "İlişkili kayıt bulunamadı veya silinemiyor.", null),
+            "23514" => (HttpStatusCode.BadRequest, "Gönderilen veriler geçerli değil.", null),
+            _ => (HttpStatusCode.InternalServerError, "Beklenmeyen bir hata oluştu.", null)
+        };
+    }
+
+    private static string? ExtractSqlState(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current.GetType().Name == "PostgresException")
+            {
+                return current.GetType().GetProperty("SqlState")?.GetValue(current) as string;
+            }
+        }
+        return null;
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

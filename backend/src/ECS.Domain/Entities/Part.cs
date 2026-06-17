@@ -37,7 +37,12 @@ public class Part : AggregateRoot
     public Warehouse? Warehouse { get; private set; }
     public Supplier? Supplier { get; private set; }
 
-    public bool IsBelowMinimum => QuantityInStock <= MinimumStock;
+    /// <summary>
+    /// Kritik stok yalnızca anlamlı bir minimum tanımlandığında (MinimumStock &gt; 0)
+    /// hesaplanır. MinimumStock = 0 ise parça "takip edilmiyor" kabul edilir ve stok 0
+    /// olsa bile kritik sayılmaz.
+    /// </summary>
+    public bool IsBelowMinimum => MinimumStock > 0 && QuantityInStock <= MinimumStock;
 
     public static Part Create(string partNo, string name, string unit = "pcs", decimal minimumStock = 0, decimal unitCost = 0)
     {

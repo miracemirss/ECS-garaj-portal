@@ -16,3 +16,20 @@ export type EnumOption = { value: string; label: string }
 export function toOptions(values: readonly string[]): EnumOption[] {
   return values.map((v) => ({ value: v, label: v }))
 }
+
+/**
+ * Backend stok hareketi enum'ı İngilizce serileşir (In/Out/Adjustment/Return);
+ * kullanıcıya Türkçe gösterilir. `hasWorkOrder` true ise çıkış hareketi bir iş
+ * emrinde tüketim anlamına gelir ("Bakımda Kullanım").
+ */
+export const StockMovementTypeLabels: Record<string, string> = {
+  In: 'Stok Girişi',
+  Out: 'Stok Çıkışı',
+  Adjustment: 'Sayım Düzeltmesi',
+  Return: 'İade',
+}
+
+export function stockMovementTypeLabel(type: string, hasWorkOrder = false): string {
+  if (type === 'Out' && hasWorkOrder) return 'Bakımda Kullanım'
+  return StockMovementTypeLabels[type] ?? type
+}

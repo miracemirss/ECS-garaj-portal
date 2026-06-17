@@ -77,9 +77,9 @@ public sealed class InventoryService : IInventoryService
             return Result.Failure<PartDto>(Error.Validation(ex.Message));
         }
 
-        if (await _parts.AnyAsync(p => p.PartNo == part.PartNo, ct))
+        if (await _parts.AnyAsync(p => p.PartNo == part.PartNo && !p.IsDeleted, ct))
         {
-            return Result.Failure<PartDto>(Error.Conflict($"A part with number {part.PartNo} already exists."));
+            return Result.Failure<PartDto>(Error.Conflict($"{part.PartNo} koduna sahip parça zaten kayıtlı."));
         }
 
         await _parts.AddAsync(part, ct);
@@ -99,7 +99,7 @@ public sealed class InventoryService : IInventoryService
         var part = await _parts.GetByIdAsync(id, ct);
         if (part is null || part.IsDeleted)
         {
-            return Result.Failure<PartDto>(Error.NotFound($"Part {id} was not found."));
+            return Result.Failure<PartDto>(Error.NotFound("Parça bulunamadı."));
         }
 
         part.SetMinimumStock(request.MinimumStock);
@@ -114,7 +114,7 @@ public sealed class InventoryService : IInventoryService
     {
         var part = await _parts.GetByIdAsync(id, ct);
         return part is null || part.IsDeleted
-            ? Result.Failure<PartDto>(Error.NotFound($"Part {id} was not found."))
+            ? Result.Failure<PartDto>(Error.NotFound("Parça bulunamadı."))
             : Result.Success(MapPart(part));
     }
 
@@ -150,7 +150,7 @@ public sealed class InventoryService : IInventoryService
         var part = await _parts.GetByIdAsync(request.PartId, ct);
         if (part is null || part.IsDeleted)
         {
-            return Result.Failure<StockMovementDto>(Error.NotFound($"Part {request.PartId} was not found."));
+            return Result.Failure<StockMovementDto>(Error.NotFound("Parça bulunamadı."));
         }
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
@@ -181,12 +181,12 @@ public sealed class InventoryService : IInventoryService
         var part = await _parts.GetByIdAsync(request.PartId, ct);
         if (part is null || part.IsDeleted)
         {
-            return Result.Failure<StockMovementDto>(Error.NotFound($"Part {request.PartId} was not found."));
+            return Result.Failure<StockMovementDto>(Error.NotFound("Parça bulunamadı."));
         }
         if (part.QuantityInStock < request.Quantity)
         {
             return Result.Failure<StockMovementDto>(Error.Conflict(
-                $"Insufficient stock for {part.PartNo}: available {part.QuantityInStock}, requested {request.Quantity}."));
+                $"{part.Name} için yeterli stok yok. Mevcut stok: {part.QuantityInStock}, istenen miktar: {request.Quantity}."));
         }
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
@@ -223,11 +223,11 @@ public sealed class InventoryService : IInventoryService
         var part = await _parts.GetByIdAsync(request.PartId, ct);
         if (part is null || part.IsDeleted)
         {
-            return Result.Failure<StockMovementDto>(Error.NotFound($"Part {request.PartId} was not found."));
+            return Result.Failure<StockMovementDto>(Error.NotFound("Parça bulunamadı."));
         }
         if (part.QuantityInStock + request.SignedQuantity < 0)
         {
-            return Result.Failure<StockMovementDto>(Error.Conflict("Adjustment would drive stock negative."));
+            return Result.Failure<StockMovementDto>(Error.Conflict("Sayım düzeltmesi mevcut stoğu negatife düşüremez."));
         }
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
@@ -255,7 +255,7 @@ public sealed class InventoryService : IInventoryService
 
     public async Task<Result<IReadOnlyList<PartDto>>> GetCriticalStocksAsync(CancellationToken ct = default)
     {
-        var parts = await _parts.ListAsync(p => p.IsActive && !p.IsDeleted && p.QuantityInStock <= p.MinimumStock, ct);
+        var parts = await _parts.ListAsync(p => p.IsActive && !p.IsDeleted && p.MinimumStock > 0 && p.QuantityInStock <= p.MinimumStock, ct);
         IReadOnlyList<PartDto> dtos = parts.Select(MapPart).ToList();
         return Result.Success(dtos);
     }

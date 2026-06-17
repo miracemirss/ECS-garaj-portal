@@ -57,9 +57,9 @@ public sealed class VehicleService : IVehicleService
             return Result.Failure<VehicleDto>(Error.Validation(ex.Message));
         }
 
-        if (await _vehicles.AnyAsync(v => v.PlateNo == vehicle.PlateNo, ct))
+        if (await _vehicles.AnyAsync(v => v.PlateNo == vehicle.PlateNo && !v.IsDeleted, ct))
         {
-            return Result.Failure<VehicleDto>(Error.Conflict($"A vehicle with plate {vehicle.PlateNo} already exists."));
+            return Result.Failure<VehicleDto>(Error.Conflict("Bu plakaya sahip araç zaten kayıtlı."));
         }
 
         await _vehicles.AddAsync(vehicle, ct);
@@ -80,7 +80,7 @@ public sealed class VehicleService : IVehicleService
         var vehicle = await _vehicles.GetByIdAsync(id, ct);
         if (vehicle is null || vehicle.IsDeleted)
         {
-            return Result.Failure<VehicleDto>(Error.NotFound($"Vehicle {id} was not found."));
+            return Result.Failure<VehicleDto>(Error.NotFound("Araç bulunamadı."));
         }
 
         try
@@ -104,7 +104,7 @@ public sealed class VehicleService : IVehicleService
     {
         var vehicle = await _vehicles.GetByIdAsync(id, ct);
         return vehicle is null || vehicle.IsDeleted
-            ? Result.Failure<VehicleDto>(Error.NotFound($"Vehicle {id} was not found."))
+            ? Result.Failure<VehicleDto>(Error.NotFound("Araç bulunamadı."))
             : Result.Success(MapToDto(vehicle));
     }
 
@@ -135,7 +135,7 @@ public sealed class VehicleService : IVehicleService
         var vehicle = await _vehicles.GetByIdAsync(id, ct);
         if (vehicle is null || vehicle.IsDeleted)
         {
-            return Result.Failure(Error.NotFound($"Vehicle {id} was not found."));
+            return Result.Failure(Error.NotFound("Araç bulunamadı."));
         }
 
         vehicle.MarkDeleted(_currentUser.UserId, _clock.UtcNow);

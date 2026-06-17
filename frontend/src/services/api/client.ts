@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
+import { toast } from 'sonner'
 import { env } from '@/lib/env'
 import { useAuthStore } from '@/features/auth/store'
 
@@ -58,8 +59,13 @@ apiClient.interceptors.response.use(
         original.headers = { ...original.headers, Authorization: `Bearer ${token}` }
         return apiClient(original)
       }
+      // Yenileme başarısız: oturum gerçekten sona erdi. Kullanıcıyı Türkçe mesajla
+      // bilgilendirip login ekranına yönlendir.
       if (typeof window !== 'undefined') {
-        window.location.assign('/login')
+        toast.error('Oturum süreniz doldu. Lütfen tekrar giriş yapın.')
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.assign('/login')
+        }
       }
     }
 

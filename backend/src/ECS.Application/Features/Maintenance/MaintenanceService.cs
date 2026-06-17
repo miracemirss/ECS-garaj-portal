@@ -89,7 +89,7 @@ public sealed class MaintenanceService : IMaintenanceService
             {
                 if (!await _vehicles.AnyAsync(v => v.Id == request.TargetId && !v.IsDeleted, ct))
                 {
-                    return Result.Failure<WorkOrderDto>(Error.NotFound($"Vehicle {request.TargetId} was not found."));
+                    return Result.Failure<WorkOrderDto>(Error.NotFound("Araç bulunamadı."));
                 }
                 workOrder = MaintenanceWorkOrder.CreateForVehicle(request.TargetId, request.Title, maintenanceType, request.OdometerBeforeKm);
             }
@@ -97,7 +97,7 @@ public sealed class MaintenanceService : IMaintenanceService
             {
                 if (!await _trailers.AnyAsync(t => t.Id == request.TargetId && !t.IsDeleted, ct))
                 {
-                    return Result.Failure<WorkOrderDto>(Error.NotFound($"Trailer {request.TargetId} was not found."));
+                    return Result.Failure<WorkOrderDto>(Error.NotFound("Dorse bulunamadı."));
                 }
                 workOrder = MaintenanceWorkOrder.CreateForTrailer(request.TargetId, request.Title, maintenanceType);
             }
@@ -134,7 +134,7 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure<WorkOrderDto>(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure<WorkOrderDto>(Error.NotFound("İş emri bulunamadı."));
         }
 
         try
@@ -167,7 +167,7 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure(Error.NotFound("İş emri bulunamadı."));
         }
 
         try
@@ -190,7 +190,7 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure<Guid>(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure<Guid>(Error.NotFound("İş emri bulunamadı."));
         }
 
         MaintenanceTask task;
@@ -219,24 +219,24 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure<WorkOrderPartDto>(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure<WorkOrderPartDto>(Error.NotFound("İş emri bulunamadı."));
         }
         if (workOrder.Status is WorkOrderStatus.Completed or WorkOrderStatus.Cancelled)
         {
-            return Result.Failure<WorkOrderPartDto>(Error.Conflict($"Cannot add parts to a {workOrder.Status} work order."));
+            return Result.Failure<WorkOrderPartDto>(Error.Conflict("Tamamlanmış veya iptal edilmiş iş emrine parça eklenemez."));
         }
 
         var part = await _parts.GetByIdAsync(request.PartId, ct);
         if (part is null || part.IsDeleted)
         {
-            return Result.Failure<WorkOrderPartDto>(Error.NotFound($"Part {request.PartId} was not found."));
+            return Result.Failure<WorkOrderPartDto>(Error.NotFound("Parça bulunamadı."));
         }
 
         var unitCost = request.UnitCost ?? part.UnitCost;
         if (part.QuantityInStock < request.Quantity)
         {
             return Result.Failure<WorkOrderPartDto>(Error.Conflict(
-                $"Insufficient stock for {part.PartNo}: available {part.QuantityInStock}, requested {request.Quantity}."));
+                $"{part.Name} için yeterli stok yok. Mevcut stok: {part.QuantityInStock}, istenen miktar: {request.Quantity}."));
         }
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
@@ -274,7 +274,7 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure<WorkOrderDto>(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure<WorkOrderDto>(Error.NotFound("İş emri bulunamadı."));
         }
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
@@ -329,7 +329,7 @@ public sealed class MaintenanceService : IMaintenanceService
         var workOrder = await _workOrders.GetByIdAsync(id, ct);
         if (workOrder is null || workOrder.IsDeleted)
         {
-            return Result.Failure<WorkOrderDto>(Error.NotFound($"Work order {id} was not found."));
+            return Result.Failure<WorkOrderDto>(Error.NotFound("İş emri bulunamadı."));
         }
 
         var lines = await _workOrderParts.ListAsync(p => p.WorkOrderId == id, ct);

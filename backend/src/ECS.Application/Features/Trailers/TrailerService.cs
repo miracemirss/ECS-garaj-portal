@@ -56,13 +56,13 @@ public sealed class TrailerService : ITrailerService
             return Result.Failure<TrailerDto>(Error.Validation(ex.Message));
         }
 
-        if (await _trailers.AnyAsync(t => t.PlateNo == trailer.PlateNo, ct))
+        if (await _trailers.AnyAsync(t => t.PlateNo == trailer.PlateNo && !t.IsDeleted, ct))
         {
-            return Result.Failure<TrailerDto>(Error.Conflict($"A trailer with plate {trailer.PlateNo} already exists."));
+            return Result.Failure<TrailerDto>(Error.Conflict("Bu plakaya sahip dorse zaten kayıtlı."));
         }
-        if (trailer.Vin is not null && await _trailers.AnyAsync(t => t.Vin == trailer.Vin, ct))
+        if (trailer.Vin is not null && await _trailers.AnyAsync(t => t.Vin == trailer.Vin && !t.IsDeleted, ct))
         {
-            return Result.Failure<TrailerDto>(Error.Conflict($"A trailer with chassis no {trailer.Vin} already exists."));
+            return Result.Failure<TrailerDto>(Error.Conflict("Bu şasi numarasına sahip dorse zaten kayıtlı."));
         }
 
         await _trailers.AddAsync(trailer, ct);
@@ -83,7 +83,7 @@ public sealed class TrailerService : ITrailerService
         var trailer = await _trailers.GetByIdAsync(id, ct);
         if (trailer is null || trailer.IsDeleted)
         {
-            return Result.Failure<TrailerDto>(Error.NotFound($"Trailer {id} was not found."));
+            return Result.Failure<TrailerDto>(Error.NotFound("Dorse bulunamadı."));
         }
 
         try
@@ -106,7 +106,7 @@ public sealed class TrailerService : ITrailerService
     {
         var trailer = await _trailers.GetByIdAsync(id, ct);
         return trailer is null || trailer.IsDeleted
-            ? Result.Failure<TrailerDto>(Error.NotFound($"Trailer {id} was not found."))
+            ? Result.Failure<TrailerDto>(Error.NotFound("Dorse bulunamadı."))
             : Result.Success(MapToDto(trailer));
     }
 
@@ -136,7 +136,7 @@ public sealed class TrailerService : ITrailerService
         var trailer = await _trailers.GetByIdAsync(id, ct);
         if (trailer is null || trailer.IsDeleted)
         {
-            return Result.Failure(Error.NotFound($"Trailer {id} was not found."));
+            return Result.Failure(Error.NotFound("Dorse bulunamadı."));
         }
 
         trailer.MarkDeleted(_currentUser.UserId, _clock.UtcNow);

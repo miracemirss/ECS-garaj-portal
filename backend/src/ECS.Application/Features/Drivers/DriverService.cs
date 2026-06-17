@@ -47,9 +47,9 @@ public sealed class DriverService : IDriverService
         }
 
         if (!string.IsNullOrWhiteSpace(request.NationalId)
-            && await _drivers.AnyAsync(d => d.NationalId == request.NationalId, ct))
+            && await _drivers.AnyAsync(d => d.NationalId == request.NationalId && !d.IsDeleted, ct))
         {
-            return Result.Failure<DriverDto>(Error.Conflict("A driver with this national id already exists."));
+            return Result.Failure<DriverDto>(Error.Conflict("Bu TC kimlik numarasına sahip şoför zaten kayıtlı."));
         }
 
         Driver driver;
@@ -81,7 +81,7 @@ public sealed class DriverService : IDriverService
         var driver = await _drivers.GetByIdAsync(id, ct);
         if (driver is null || driver.IsDeleted)
         {
-            return Result.Failure<DriverDto>(Error.NotFound($"Driver {id} was not found."));
+            return Result.Failure<DriverDto>(Error.NotFound("Şoför bulunamadı."));
         }
 
         driver.SetContact(request.Phone, request.Email);
@@ -97,7 +97,7 @@ public sealed class DriverService : IDriverService
     {
         var driver = await _drivers.GetByIdAsync(id, ct);
         return driver is null || driver.IsDeleted
-            ? Result.Failure<DriverDto>(Error.NotFound($"Driver {id} was not found."))
+            ? Result.Failure<DriverDto>(Error.NotFound("Şoför bulunamadı."))
             : Result.Success(MapToDto(driver));
     }
 
@@ -127,7 +127,7 @@ public sealed class DriverService : IDriverService
         var driver = await _drivers.GetByIdAsync(id, ct);
         if (driver is null || driver.IsDeleted)
         {
-            return Result.Failure(Error.NotFound($"Driver {id} was not found."));
+            return Result.Failure(Error.NotFound("Şoför bulunamadı."));
         }
 
         driver.MarkDeleted(_currentUser.UserId, _clock.UtcNow);

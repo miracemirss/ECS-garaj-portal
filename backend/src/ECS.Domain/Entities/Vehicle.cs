@@ -51,8 +51,30 @@ public class Vehicle : AggregateRoot
 
         return new Vehicle(PlateNumber.Normalize(plateNo), brand.Trim(), model?.Trim(), modelYear)
         {
-            Vin = string.IsNullOrWhiteSpace(vin) ? null : vin.Trim().ToUpperInvariant()
+            Vin = NormalizeVin(vin)
         };
+    }
+
+    /// <summary>
+    /// Şasi (VIN) numarası zorunlu değildir. Boş/null ise null'a normalize edilir;
+    /// girildiyse trim + büyük harfe çevrilir ve uzunluğu doğrulanır. Geçersiz ise
+    /// <see cref="DomainException"/> fırlatılır (API katmanında 400'e maplenir, asla 500).
+    /// </summary>
+    private static string? NormalizeVin(string? vin)
+    {
+        if (string.IsNullOrWhiteSpace(vin))
+        {
+            return null;
+        }
+
+        var normalized = vin.Trim().ToUpperInvariant();
+        if (normalized.Length < 11 || normalized.Length > 17)
+        {
+            throw new DomainException(
+                "Şasi numarası geçersiz. Şasi numarası boş bırakılabilir veya geçerli formatta girilmelidir.");
+        }
+
+        return normalized;
     }
 
     public void UpdateOdometer(int km)
