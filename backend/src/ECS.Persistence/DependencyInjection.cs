@@ -21,7 +21,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<AuditableEntityInterceptor>();
+        // Scoped: the interceptor depends on ICurrentUserService (scoped). A singleton
+        // interceptor would fail DI scope validation at WebApplication.Build().
+        services.AddScoped<AuditableEntityInterceptor>();
 
         // Build a shared NpgsqlDataSource that maps the CLR enums onto the native
         // PostgreSQL enum types from migration 0001. The DB labels are PascalCase
