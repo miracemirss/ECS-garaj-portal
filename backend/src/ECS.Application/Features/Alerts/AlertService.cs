@@ -57,7 +57,7 @@ public sealed class AlertService : IAlertService
 
     public async Task<int> GenerateCriticalStockAlertsAsync(CancellationToken ct = default)
     {
-        var parts = await _parts.ListAsync(p => p.IsActive && !p.IsDeleted && p.QuantityInStock <= p.MinimumStock, ct);
+        var parts = await _parts.ListAsync(p => p.IsActive && !p.IsDeleted && p.MinimumStock > 0 && p.QuantityInStock <= p.MinimumStock, ct);
         var created = 0;
 
         foreach (var part in parts)

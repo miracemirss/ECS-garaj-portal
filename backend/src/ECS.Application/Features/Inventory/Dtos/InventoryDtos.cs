@@ -38,7 +38,7 @@ public sealed record UpdatePartRequest(
     decimal MinimumStock = 0,
     decimal UnitCost = 0);
 
-public sealed record ReceiveStockRequest(Guid PartId, decimal Quantity, decimal UnitCost, Guid? WarehouseId = null, string? Note = null);
+public sealed record ReceiveStockRequest(Guid PartId, decimal Quantity, decimal? UnitCost = null, Guid? WarehouseId = null, string? Note = null);
 
 public sealed record IssueStockRequest(Guid PartId, decimal Quantity, string? Note = null);
 

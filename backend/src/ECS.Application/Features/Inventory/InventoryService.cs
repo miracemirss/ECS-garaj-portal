@@ -156,7 +156,7 @@ public sealed class InventoryService : IInventoryService
         await using var tx = await _uow.BeginTransactionAsync(ct);
 
         part.IncreaseStock(request.Quantity);
-        var movement = StockMovement.In(part.Id, request.Quantity, request.UnitCost, request.WarehouseId, note: request.Note);
+        var movement = StockMovement.In(part.Id, request.Quantity, request.UnitCost ?? 0, request.WarehouseId, note: request.Note);
         movement.StampBalance(part.QuantityInStock);
         movement.AssignNumber(await _numbers.NextStockMovementNoAsync(ct));
 

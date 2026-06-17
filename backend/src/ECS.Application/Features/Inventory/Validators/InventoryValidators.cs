@@ -30,7 +30,7 @@ public sealed class ReceiveStockRequestValidator : AbstractValidator<ReceiveStoc
     {
         RuleFor(x => x.PartId).NotEmpty();
         RuleFor(x => x.Quantity).GreaterThan(0);
-        RuleFor(x => x.UnitCost).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.UnitCost).GreaterThanOrEqualTo(0).When(x => x.UnitCost.HasValue);
     }
 }
 
