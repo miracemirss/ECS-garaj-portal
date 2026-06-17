@@ -64,8 +64,8 @@ function + view). EF Core "database-first" eşlenir.
   3. Migration'ı **tek transaction** + `ON_ERROR_STOP=1` ile uygula; geri alma
      planı (yedekten restore) hazır olsun.
   4. Üretimde **demo seed asla** çalıştırılmaz (`RUN_DEMO_SEED=false`).
-  5. İlk kurulumdan sonra admin parolasını uygulama üzerinden ata (seed'deki
-     `password_hash` placeholder'dır; gerçek hash atanana dek login başarısız olur).
+  5. İlk kurulumdan sonra bootstrap admin parolasını değiştir
+     (`admin@ecslog.com` / `Admin123!` yalnızca ilk giriş içindir).
 
 ## 5. Logging stratejisi
 

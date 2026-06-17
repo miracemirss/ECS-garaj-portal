@@ -24,7 +24,17 @@ public class Driver : AggregateRoot
     public string? Email { get; private set; }
     public string? LicenseNo { get; private set; }
     public string? LicenseClass { get; private set; }
+    public DateOnly? LicenseStartDate { get; private set; }
     public DateOnly? LicenseExpiryDate { get; private set; }
+    public DateOnly? SrcStartDate { get; private set; }
+    public DateOnly? SrcEndDate { get; private set; }
+    public DateOnly? PsychotechnicalStartDate { get; private set; }
+    public DateOnly? PsychotechnicalEndDate { get; private set; }
+    public DateOnly? VisaStartDate { get; private set; }
+    public DateOnly? VisaEndDate { get; private set; }
+    public DateOnly? PassportStartDate { get; private set; }
+    public DateOnly? PassportEndDate { get; private set; }
+    public string? DocumentNote { get; private set; }
     public DriverStatus Status { get; private set; }
     public DateOnly? HireDate { get; private set; }
     public DateOnly? BirthDate { get; private set; }
@@ -44,11 +54,34 @@ public class Driver : AggregateRoot
 
     public void ChangeStatus(DriverStatus status) => Status = status;
 
-    public void SetLicense(string? licenseNo, string? licenseClass, DateOnly? expiry)
+    public void SetLicense(string? licenseNo, string? licenseClass, DateOnly? start, DateOnly? expiry)
     {
         LicenseNo = licenseNo?.Trim();
         LicenseClass = licenseClass?.Trim();
+        LicenseStartDate = start;
         LicenseExpiryDate = expiry;
+    }
+
+    public void SetDocuments(
+        DateOnly? srcStartDate,
+        DateOnly? srcEndDate,
+        DateOnly? psychotechnicalStartDate,
+        DateOnly? psychotechnicalEndDate,
+        DateOnly? visaStartDate,
+        DateOnly? visaEndDate,
+        DateOnly? passportStartDate,
+        DateOnly? passportEndDate,
+        string? documentNote)
+    {
+        SrcStartDate = srcStartDate;
+        SrcEndDate = srcEndDate;
+        PsychotechnicalStartDate = psychotechnicalStartDate;
+        PsychotechnicalEndDate = psychotechnicalEndDate;
+        VisaStartDate = visaStartDate;
+        VisaEndDate = visaEndDate;
+        PassportStartDate = passportStartDate;
+        PassportEndDate = passportEndDate;
+        DocumentNote = string.IsNullOrWhiteSpace(documentNote) ? null : documentNote.Trim();
     }
 
     public void SetContact(string? phone, string? email)

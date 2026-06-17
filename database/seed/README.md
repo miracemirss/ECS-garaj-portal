@@ -27,6 +27,10 @@ RUN_DEMO_SEED=true docker compose up -d --build   # migrator otomatik yükler
 
 ## Demo hesaplar
 
-`admin@ecs.local` (Admin) çekirdek seed'de gelir; `fleet@ecs.local`,
-`tech@ecs.local`, `depo@ecs.local` demo seed'de eklenir. Tümünün parola hash'i
-**placeholder**'dır — giriş için parolayı uygulama üzerinden atayın.
+`admin@ecslog.com` (Admin) çekirdek seed'de gelir. Bootstrap parolası
+`Admin123!` değeridir; ilk girişten sonra değiştirin. Local geliştirme için
+`admin@ecs.local` alias'ı da eklenir.
+
+`fleet@ecs.local`, `tech@ecs.local`, `depo@ecs.local` demo seed'de eklenir.
+Bu demo kullanıcıların parola hash'i **placeholder**'dır — giriş için parolayı
+uygulama üzerinden atayın.

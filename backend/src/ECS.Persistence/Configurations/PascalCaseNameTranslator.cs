@@ -1,4 +1,4 @@
-using Npgsql.NameTranslation;
+using Npgsql;
 
 namespace ECS.Persistence.Configurations;
 

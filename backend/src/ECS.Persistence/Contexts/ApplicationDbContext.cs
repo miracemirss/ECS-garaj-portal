@@ -103,18 +103,21 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Vehicle>(e =>
         {
             e.ToTable("vehicles");
+            e.Property(v => v.Status).HasColumnType("asset_status");
             e.Ignore(v => v.DomainEvents);
         });
 
         modelBuilder.Entity<Trailer>(e =>
         {
             e.ToTable("trailers");
+            e.Property(t => t.Status).HasColumnType("asset_status");
             e.Ignore(t => t.DomainEvents);
         });
 
         modelBuilder.Entity<Driver>(e =>
         {
             e.ToTable("drivers");
+            e.Property(d => d.Status).HasColumnType("driver_status");
             e.Ignore(d => d.FullName);
             e.Ignore(d => d.DomainEvents);
         });
@@ -145,6 +148,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<MaintenanceWorkOrder>(e =>
         {
             e.ToTable("maintenance_work_orders");
+            e.Property(w => w.TargetType).HasColumnType("work_order_target_type");
+            e.Property(w => w.MaintenanceType).HasColumnType("maintenance_type");
+            e.Property(w => w.Status).HasColumnType("work_order_status");
             e.Ignore(w => w.TotalCost); // generated column / computed in C#
             e.Ignore(w => w.DomainEvents);
             e.Ignore(w => w.Vehicle);
@@ -163,6 +169,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<StockMovement>(e =>
         {
             e.ToTable("stock_movements");
+            e.Property(m => m.MovementType).HasColumnType("stock_movement_type");
             e.Ignore(m => m.Part);
         });
 
@@ -178,6 +185,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<VehicleTrailerAssignment>(e =>
         {
             e.ToTable("vehicle_trailer_assignments");
+            e.Property(a => a.Status).HasColumnType("assignment_status");
             e.Ignore(a => a.DomainEvents);
             e.Ignore(a => a.Vehicle);
             e.Ignore(a => a.Trailer);
@@ -187,6 +195,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<DriverVehicleAssignment>(e =>
         {
             e.ToTable("driver_vehicle_assignments");
+            e.Property(a => a.Status).HasColumnType("assignment_status");
             e.Ignore(a => a.DomainEvents);
             e.Ignore(a => a.Driver);
             e.Ignore(a => a.Vehicle);
@@ -197,7 +206,11 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Alert>(e =>
         {
             e.ToTable("alerts");
-            e.Property(a => a.Priority).HasColumnName("severity");
+            e.Property(a => a.AlertType).HasColumnType("alert_type");
+            e.Property(a => a.Priority)
+                .HasColumnName("severity")
+                .HasColumnType("alert_severity");
+            e.Property(a => a.Status).HasColumnType("alert_status");
         });
 
         modelBuilder.Entity<CompanySetting>(e =>
@@ -208,7 +221,12 @@ public class ApplicationDbContext : DbContext
             IgnoreSoftDelete(e);
         });
 
-        modelBuilder.Entity<Document>(e => e.ToTable("documents"));
+        modelBuilder.Entity<Document>(e =>
+        {
+            e.ToTable("documents");
+            e.Property(d => d.OwnerType).HasColumnType("document_owner_type");
+            e.Property(d => d.DocumentType).HasColumnType("document_type");
+        });
 
         modelBuilder.Entity<ReportFile>(e =>
         {

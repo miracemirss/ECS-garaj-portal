@@ -79,6 +79,7 @@ docker compose up -d --build
 
 - Uygulama: http://localhost:8080  ·  API: http://localhost:5080  ·  Sağlık: `/health`
 - `migrator` servisi `database/migrations/*.sql`'i sırayla uygular (şema varsa atlar).
+- İlk giriş: `admin@ecslog.com` / `Admin123!` (`admin@ecs.local` local alias olarak da çalışır; hemen değiştirin).
 
 Detaylar: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 

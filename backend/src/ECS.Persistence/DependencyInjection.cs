@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using System.Globalization;
 
 namespace ECS.Persistence;
 
@@ -51,7 +52,7 @@ public static class DependencyInjection
             options.UseNpgsql(
                 serviceProvider.GetRequiredService<NpgsqlDataSource>(),
                 npgsql => npgsql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
-            options.UseSnakeCaseNamingConvention();
+            options.UseSnakeCaseNamingConvention(CultureInfo.InvariantCulture);
             options.AddInterceptors(serviceProvider.GetRequiredService<AuditableEntityInterceptor>());
         });
 

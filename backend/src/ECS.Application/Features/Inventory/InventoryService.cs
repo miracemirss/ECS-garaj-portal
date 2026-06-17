@@ -82,9 +82,31 @@ public sealed class InventoryService : IInventoryService
             return Result.Failure<PartDto>(Error.Conflict($"A part with number {part.PartNo} already exists."));
         }
 
+        await using var tx = await _uow.BeginTransactionAsync(ct);
+
         await _parts.AddAsync(part, ct);
         await _uow.SaveChangesAsync(ct);
+
+        if (request.InitialStock > 0)
+        {
+            part.IncreaseStock(request.InitialStock);
+            var openingMovement = StockMovement.In(
+                part.Id,
+                request.InitialStock,
+                request.UnitCost,
+                request.WarehouseId,
+                request.SupplierId,
+                "Baslangic stogu");
+            openingMovement.StampBalance(part.QuantityInStock);
+            openingMovement.AssignNumber(await _numbers.NextStockMovementNoAsync(ct));
+
+            await _movements.AddAsync(openingMovement, ct);
+            _parts.Update(part);
+            await _uow.SaveChangesAsync(ct);
+        }
+
         await _audit.LogAsync("PartCreated", nameof(Part), part.Id.ToString(), new { part.PartNo }, ct);
+        await tx.CommitAsync(ct);
         return Result.Success(MapPart(part));
     }
 

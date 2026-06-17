@@ -10,18 +10,52 @@ public sealed record DriverDto(
     string? Email,
     string Status,
     string? LicenseNo,
-    DateOnly? LicenseExpiryDate);
+    string? LicenseClass,
+    DateOnly? LicenseStartDate,
+    DateOnly? LicenseExpiryDate,
+    DateOnly? SrcStartDate,
+    DateOnly? SrcEndDate,
+    DateOnly? PsychotechnicalStartDate,
+    DateOnly? PsychotechnicalEndDate,
+    DateOnly? VisaStartDate,
+    DateOnly? VisaEndDate,
+    DateOnly? PassportStartDate,
+    DateOnly? PassportEndDate,
+    string? DocumentNote);
 
 public sealed record CreateDriverRequest(
     string FirstName,
     string LastName,
     string? NationalId = null,
     string? Phone = null,
-    string? Email = null);
+    string? Email = null,
+    string? LicenseNo = null,
+    string? LicenseClass = null,
+    DateOnly? LicenseStartDate = null,
+    DateOnly? LicenseExpiryDate = null,
+    DateOnly? SrcStartDate = null,
+    DateOnly? SrcEndDate = null,
+    DateOnly? PsychotechnicalStartDate = null,
+    DateOnly? PsychotechnicalEndDate = null,
+    DateOnly? VisaStartDate = null,
+    DateOnly? VisaEndDate = null,
+    DateOnly? PassportStartDate = null,
+    DateOnly? PassportEndDate = null,
+    string? DocumentNote = null);
 
 public sealed record UpdateDriverRequest(
     string? Phone = null,
     string? Email = null,
     string? LicenseNo = null,
     string? LicenseClass = null,
-    DateOnly? LicenseExpiryDate = null);
+    DateOnly? LicenseStartDate = null,
+    DateOnly? LicenseExpiryDate = null,
+    DateOnly? SrcStartDate = null,
+    DateOnly? SrcEndDate = null,
+    DateOnly? PsychotechnicalStartDate = null,
+    DateOnly? PsychotechnicalEndDate = null,
+    DateOnly? VisaStartDate = null,
+    DateOnly? VisaEndDate = null,
+    DateOnly? PassportStartDate = null,
+    DateOnly? PassportEndDate = null,
+    string? DocumentNote = null);

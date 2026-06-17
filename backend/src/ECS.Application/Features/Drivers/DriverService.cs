@@ -57,6 +57,17 @@ public sealed class DriverService : IDriverService
         {
             driver = Driver.Create(request.FirstName, request.LastName, request.NationalId);
             driver.SetContact(request.Phone, request.Email);
+            driver.SetLicense(request.LicenseNo, request.LicenseClass, request.LicenseStartDate, request.LicenseExpiryDate);
+            driver.SetDocuments(
+                request.SrcStartDate,
+                request.SrcEndDate,
+                request.PsychotechnicalStartDate,
+                request.PsychotechnicalEndDate,
+                request.VisaStartDate,
+                request.VisaEndDate,
+                request.PassportStartDate,
+                request.PassportEndDate,
+                request.DocumentNote);
         }
         catch (DomainException ex)
         {
@@ -85,7 +96,17 @@ public sealed class DriverService : IDriverService
         }
 
         driver.SetContact(request.Phone, request.Email);
-        driver.SetLicense(request.LicenseNo, request.LicenseClass, request.LicenseExpiryDate);
+        driver.SetLicense(request.LicenseNo, request.LicenseClass, request.LicenseStartDate, request.LicenseExpiryDate);
+        driver.SetDocuments(
+            request.SrcStartDate,
+            request.SrcEndDate,
+            request.PsychotechnicalStartDate,
+            request.PsychotechnicalEndDate,
+            request.VisaStartDate,
+            request.VisaEndDate,
+            request.PassportStartDate,
+            request.PassportEndDate,
+            request.DocumentNote);
         _drivers.Update(driver);
         await _uow.SaveChangesAsync(ct);
         await _audit.LogAsync("DriverUpdated", nameof(Driver), driver.Id.ToString(), null, ct);
@@ -140,5 +161,7 @@ public sealed class DriverService : IDriverService
 
     private static DriverDto MapToDto(Driver d) => new(
         d.Id, d.FirstName, d.LastName, d.FullName, d.NationalId, d.Phone, d.Email,
-        d.Status.ToString(), d.LicenseNo, d.LicenseExpiryDate);
+        d.Status.ToString(), d.LicenseNo, d.LicenseClass, d.LicenseStartDate, d.LicenseExpiryDate,
+        d.SrcStartDate, d.SrcEndDate, d.PsychotechnicalStartDate, d.PsychotechnicalEndDate,
+        d.VisaStartDate, d.VisaEndDate, d.PassportStartDate, d.PassportEndDate, d.DocumentNote);
 }

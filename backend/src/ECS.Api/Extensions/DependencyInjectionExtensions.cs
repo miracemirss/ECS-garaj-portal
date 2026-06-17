@@ -23,7 +23,7 @@ public static class DependencyInjectionExtensions
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "ECS Fleet Maintenance & Inventory API",
+                Title = "ECS Garaj Bakim ve Stok Yonetimi API",
                 Version = "v1"
             });
 

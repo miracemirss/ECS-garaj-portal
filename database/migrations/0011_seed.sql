@@ -4,9 +4,10 @@
 -- Minimal data required to boot the system: roles, an admin user, the company
 -- settings singleton and a default warehouse. Safe to run multiple times.
 --
--- SECURITY: the admin password_hash below is a PLACEHOLDER. Replace it by
--- setting the password through the application (or update with a real bcrypt
--- hash) before going live. Login will fail until a valid hash is set.
+-- SECURITY: the admin password below is a local/bootstrap default:
+--   email: admin@ecslog.com (admin@ecs.local is kept as a local alias)
+--   password: Admin123!
+-- Change it immediately after first login, especially outside local/dev.
 -- ============================================================================
 
 INSERT INTO roles (name, description, is_system) VALUES
@@ -18,13 +19,29 @@ INSERT INTO roles (name, description, is_system) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO users (email, full_name, password_hash, is_active)
-VALUES ('admin@ecs.local', 'System Administrator', 'REPLACE_WITH_BCRYPT_HASH', true)
-ON CONFLICT (email) DO NOTHING;
+VALUES (
+    'admin@ecs.local',
+    'System Administrator',
+    '100000.qp4T5uJptTYPn+NrAYjYrw==.mKrKwc8P12cGF2bWTfy3Uh+iGeLXwX1HuesMKnscGMI=',
+    true
+),
+(
+    'admin@ecslog.com',
+    'System Administrator',
+    '100000.qp4T5uJptTYPn+NrAYjYrw==.mKrKwc8P12cGF2bWTfy3Uh+iGeLXwX1HuesMKnscGMI=',
+    true
+)
+ON CONFLICT (email) DO UPDATE
+SET
+    password_hash = EXCLUDED.password_hash,
+    is_active = true,
+    updated_at = now()
+WHERE users.password_hash = 'REPLACE_WITH_BCRYPT_HASH';
 
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id
 FROM users u, roles r
-WHERE u.email = 'admin@ecs.local' AND r.name = 'Admin'
+WHERE u.email IN ('admin@ecs.local', 'admin@ecslog.com') AND r.name = 'Admin'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO company_settings (

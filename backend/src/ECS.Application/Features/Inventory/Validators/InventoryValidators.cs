@@ -1,4 +1,5 @@
 using ECS.Application.Features.Inventory.Dtos;
+using ECS.Application.Common;
 using FluentValidation;
 
 namespace ECS.Application.Features.Inventory.Validators;
@@ -9,6 +10,10 @@ public sealed class CreatePartRequestValidator : AbstractValidator<CreatePartReq
     {
         RuleFor(x => x.PartNo).NotEmpty().MaximumLength(64);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Unit)
+            .Must(FleetOptions.IsValidPartUnit)
+            .WithMessage("Gecerli bir parca birimi secin.");
+        RuleFor(x => x.InitialStock).GreaterThanOrEqualTo(0);
         RuleFor(x => x.MinimumStock).GreaterThanOrEqualTo(0);
         RuleFor(x => x.UnitCost).GreaterThanOrEqualTo(0);
     }

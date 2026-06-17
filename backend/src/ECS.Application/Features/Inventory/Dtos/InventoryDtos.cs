@@ -26,7 +26,8 @@ public sealed record StockMovementDto(
 public sealed record CreatePartRequest(
     string PartNo,
     string Name,
-    string Unit = "pcs",
+    string Unit = "Adet",
+    decimal InitialStock = 0,
     decimal MinimumStock = 0,
     decimal UnitCost = 0,
     Guid? WarehouseId = null,
